@@ -1,0 +1,25 @@
+{
+  "name": "vgl",
+  "version": "0.0.1",
+  "description": "Lightweight effects compositor on WebGL",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ydaniv/vgl.git"
+  },
+  "keywords": [
+    "webgl",
+    "effects",
+    "video",
+    "canvas"
+  ],
+  "author": "Yehonatan Daniv",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ydaniv/vgl/issues"
+  },
+  "homepage": "https://github.com/ydaniv/vgl#readme"
+}
