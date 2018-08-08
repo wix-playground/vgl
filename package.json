@@ -4,6 +4,9 @@
   "description": "Lightweight effects compositor on WebGL",
   "main": "index.js",
   "scripts": {
+    "build": "rollup -c",
+    "watch": "rollup -c -w",
+    "demo": "cd demo && rollup -c && cd -",
     "test": "test"
   },
   "repository": {
@@ -21,5 +24,10 @@
   "bugs": {
     "url": "https://github.com/ydaniv/vgl/issues"
   },
-  "homepage": "https://github.com/ydaniv/vgl#readme"
+  "homepage": "https://github.com/ydaniv/vgl#readme",
+  "dependencies": {
+    "rollup": "^0.64.1",
+    "rollup-plugin-filesize": "^4.0.1",
+    "rollup-plugin-progress": "^0.4.0"
+  }
 }
