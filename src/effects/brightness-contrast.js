@@ -20,18 +20,16 @@ precision mediump float;
 varying vec2 v_texCoord;
 
 uniform float u_contrast;
-uniform float u_brightness
+uniform float u_brightness;
 uniform sampler2D u_source;
 
 const vec3 half3 = vec3(0.5);
 
-vec4 pixel = texture2D(u_source, v_texCoord);
-
-vec3 color = pixel.rgb * brightness;
-
-color = (color - half3) * contrast + half3;
-
 void main() {
+    vec4 pixel = texture2D(u_source, v_texCoord);
+    vec3 color = pixel.rgb * u_brightness;
+    color = (color - half3) * u_contrast + half3;
+
     gl_FragColor = vec4(color, pixel.a);
 }`,
     uniforms: [
@@ -39,13 +37,13 @@ void main() {
             name: 'u_brightness',
             size: 1,
             type: 'f',
-            data: [1]
+            data: [1.0]
         },
         {
             name: 'u_contrast',
             size: 1,
             type: 'f',
-            data: [1]
+            data: [1.0]
         }
     ],
     attributes: [

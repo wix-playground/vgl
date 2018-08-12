@@ -11,8 +11,8 @@ varying vec2 v_texColorCoord;
 varying vec2 v_texAlphaCoord;
 
 void main() {
-    vTexColorCoord = a_texCoord;
-    vTexAlphaCoord = v_texColorCoord + u_texOffset;
+    v_texColorCoord = a_texCoord;
+    v_texAlphaCoord = v_texColorCoord + u_texOffset;
 
     gl_Position = vec4(a_position, 0.0, 1.0);
 }`,
@@ -32,7 +32,7 @@ void main() {
             name: 'u_texOffset',
             size: 2,
             type: 'f',
-            data: [0.0, 0.5]
+            data: [0.0, -0.5]
         }
     ],
     attributes: [
@@ -51,12 +51,12 @@ void main() {
         {
             name: 'a_texCoord',
             data: new Float32Array([
-                0.0, 0.0,
-                1.0, 0.0,
                 0.0, 0.5,
-                0.0, 0.5,
-                1.0, 0.0,
-                1.0, 0.5]),
+                1.0, 0.5,
+                0.0, 1.0,
+                0.0, 1.0,
+                1.0, 0.5,
+                1.0, 1.0]),
             size: 2,
             type: 'FLOAT'
         }

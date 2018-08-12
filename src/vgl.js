@@ -26,9 +26,9 @@ function register (target, effects) {
  * @param {HTMLVideoElement} src
  */
 function start (target, src) {
-    const {gl, data, texture, framebuffer} = target.get(target);
+    const {gl, data} = targets.get(target);
 
-    videogl.loop(gl, src, {data, texture, framebuffer});
+    videogl.loop(gl, src, data);
 }
 
 /**
@@ -42,7 +42,7 @@ function start (target, src) {
  * @property {string} name
  * @property {number} size
  * @property {string} type
- * @property {ArrayBuffer} data
+ * @property {ArrayBufferView} data
  *
  * @typedef {Object} Uniform
  * @property {string} name
