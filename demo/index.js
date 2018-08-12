@@ -410,8 +410,6 @@ void main() {
         vertexSrc: `
 precision mediump float;
 
-uniform vec2 u_texOffset;
-
 attribute vec2 a_texCoord;
 attribute vec2 a_position;
 
@@ -445,13 +443,13 @@ void main() {
                 name: 'u_brightness',
                 size: 1,
                 type: 'f',
-                data: [4.0]
+                data: [1.0]
             },
             {
                 name: 'u_contrast',
                 size: 1,
                 type: 'f',
-                data: [2]
+                data: [1.0]
             }
         ],
         attributes: [

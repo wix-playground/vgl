@@ -17,21 +17,7 @@
 
         const programData = _initProgram(gl, effects);
 
-        // create a target texture to render to
-        const texture = _createTexture(gl);
-
-        let framebuffer = null;
-
-        if ( effects.length > 1 ) {
-            // Create and bind the framebuffer
-            framebuffer = gl.createFramebuffer();
-            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-
-            // attach the texture as the first color attachment
-            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0);
-        }
-
-        return {gl, data: programData, texture, framebuffer};
+        return {gl, data: programData};
     }
 
     function getWebGLContext (canvas) {
@@ -43,6 +29,7 @@
     }
 
     function resize (gl) {
+        let resized = false;
         const canvas = gl.canvas;
         const realToCSSPixels = 1; //window.devicePixelRatio;
 
@@ -57,9 +44,12 @@
             // Make the canvas the same size
             canvas.width  = displayWidth;
             canvas.height = displayHeight;
+            resized = true;
         }
 
         gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+
+        return resized;
     }
 
     function loop (gl, video, scene) {
@@ -67,35 +57,40 @@
         draw(gl, video, scene);
     }
 
-    function draw (gl, video, scene) {
-        const {data, texture, framebuffer} = scene;
-        const lastIndex = data.length - 1;
-
-        let hasFramebuffer = false;
-
-        if ( framebuffer ) {
-            hasFramebuffer = true;
-            gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-        }
-
+    function draw (gl, video, data) {
         // resize the target canvas if its size in the DOM changed
-        resize(gl);
-
-        // clear the buffer
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        const resized = resize(gl);
 
         // these two fix bad dithered junk edges rendered in Safari
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);
 
-        data.forEach((layer, i) => {
-            const {program, attributes, uniforms} = layer;
+        data.forEach(layer => {
+            const {program, source, target, attributes, uniforms} = layer;
+            const isBufferTarget = Boolean(target && target.buffer);
 
-            // if we have a framebuffer we're rendering into and this is the last effect in the chain
-            if ( hasFramebuffer && i === lastIndex ) {
-                // then render to screen
-                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            // then render to the target buffer or screen
+            gl.bindFramebuffer(gl.FRAMEBUFFER, isBufferTarget ? target.buffer : null);
+
+            // bind the source texture
+            gl.bindTexture(gl.TEXTURE_2D, source.texture);
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+            // if source has no buffer then the media is the actual source
+            if ( source.buffer === null ) {
+                // tell webgl we're reading premultiplied data
+                gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+            }
+            else {
+                gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+            }
+
+            if ( resized && isBufferTarget ) {
+                _resizeTexture(gl, target);
+                // re-bind the source texture
+                gl.bindTexture(gl.TEXTURE_2D, source.texture);
             }
 
             // Tell it to use our program (pair of shaders)
@@ -107,14 +102,9 @@
             // set uniforms with data
             _setUniforms(gl, uniforms);
 
-            gl.bindTexture(gl.TEXTURE_2D, texture);
-            // tell webgl we're reading premultiplied data
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
-
-            // only on first effect read the actual source
-            if ( i === 0 ) {
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
-            }
+            // clear the buffer
+            gl.clearColor(0.0, 0.0, 0.0, 0.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
 
             // Draw the rectangle.
             gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -122,8 +112,48 @@
     }
 
     function _initProgram (gl, effects) {
-        return effects.map(config => {
+        let lastTarget;
+        const lastIndex = effects.length - 1;
+
+        return effects.map((config, i) => {
             const {vertexSrc, fragmentSrc, attributes, uniforms} = config;
+
+            let source;
+            let target = null;
+
+            if ( i === 0 ) {
+                // create a source texture to render into
+                source = {
+                    texture: _createTexture(gl).texture,
+                    buffer: null
+                };
+            }
+            else {
+                source = lastTarget;
+            }
+
+            // last node (or one node) just renders to the screen
+            if ( i !== lastIndex ) {
+                // Prepare a framebuffer as a target to render to
+                // create a secondary target texture to render the source media into
+                const targetTexture = _createTexture(gl);
+
+                // Create and bind the framebuffer
+                const framebuffer = gl.createFramebuffer();
+
+                gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+
+                // attach the texture as the first color attachment
+                gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, targetTexture.texture, 0);
+
+                target = targetTexture;
+                target.buffer = framebuffer;
+
+                // cache this target for next iteration, so it can serve as source for the next node
+                lastTarget = target;
+            }
+
+            // compile the GLSL program
             const program = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
 
             // setup the vertex data
@@ -134,15 +164,26 @@
 
             return {
                 program,
+                source,
+                target,
                 attributes: attribBuffers,
                 uniforms: uniformData
             };
         });
     }
 
+    function _resizeTexture (gl, textureObject) {
+        textureObject.width = gl.canvas.width;
+        textureObject.height = gl.canvas.height;
+
+        gl.bindTexture(gl.TEXTURE_2D, textureObject.texture);
+        // resize our target texture
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, textureObject.width, textureObject.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    }
+
     function _getWebGLProgram (gl, vertexSrc, fragmentSrc) {
-        const vertexShader = _createShader(gl.VERTEX_SHADER, vertexSrc);
-        const fragmentShader = _createShader(gl.FRAGMENT_SHADER, fragmentSrc);
+        const vertexShader = _createShader(gl, gl.VERTEX_SHADER, vertexSrc);
+        const fragmentShader = _createShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
 
         return _createProgram(gl, vertexShader, fragmentShader);
     }
@@ -160,7 +201,7 @@
             return program;
         }
 
-        // console.log(gl.getProgramInfoLog(program));
+        console.log(gl.getProgramInfoLog(program));
         gl.deleteProgram(program);
     }
 
@@ -176,16 +217,14 @@
             return shader;
         }
 
-        // console.log(gl.getShaderInfoLog(shader));
+        console.log(gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
     }
 
-    function _createTexture (gl) {
+    function _createTexture (gl, width=1, height=1) {
         const texture = gl.createTexture();
 
         gl.bindTexture(gl.TEXTURE_2D, texture);
-        // tell webgl we're reading premultiplied data
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 
         // Set the parameters so we can render any size image.
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -194,19 +233,19 @@
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
 
         // Upload the image into the texture.
-        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, null);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
 
-        return texture;
+        return {texture, width, height};
     }
 
     function _createBuffer (gl, program, name, data) {
-        const attribLocation = gl.getAttribLocation(program, name);
+        const location = gl.getAttribLocation(program, name);
         const buffer = gl.createBuffer();
 
         gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
         gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
 
-        return [attribLocation, buffer];
+        return {location, buffer};
     }
 
     function _initVertexAttributes (gl, program, data) {
@@ -280,9 +319,9 @@
      * @param {HTMLVideoElement} src
      */
     function start (target, src) {
-        const {gl, data, texture, framebuffer} = target.get(target);
+        const {gl, data} = targets.get(target);
 
-        videogl.loop(gl, src, {data, texture, framebuffer});
+        videogl.loop(gl, src, data);
     }
 
     /**
@@ -296,7 +335,7 @@
      * @property {string} name
      * @property {number} size
      * @property {string} type
-     * @property {ArrayBuffer} data
+     * @property {ArrayBufferView} data
      *
      * @typedef {Object} Uniform
      * @property {string} name

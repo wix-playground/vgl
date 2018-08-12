@@ -2,8 +2,6 @@ export default {
     vertexSrc: `
 precision mediump float;
 
-uniform vec2 u_texOffset;
-
 attribute vec2 a_texCoord;
 attribute vec2 a_position;
 
