@@ -68,10 +68,10 @@ function draw (gl, video, data) {
 
         // bind the source texture
         gl.bindTexture(gl.TEXTURE_2D, source.texture);
-        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
         // if source has no buffer then the media is the actual source
         if ( source.buffer === null ) {
+            gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
             // tell webgl we're reading premultiplied data
             gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 

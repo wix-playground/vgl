@@ -35,13 +35,13 @@ void main() {
             name: 'u_brightness',
             size: 1,
             type: 'f',
-            data: [1.0]
+            data: [1.2]
         },
         {
             name: 'u_contrast',
             size: 1,
             type: 'f',
-            data: [1.0]
+            data: [2.0]
         }
     ],
     attributes: [
@@ -60,12 +60,12 @@ void main() {
         {
             name: 'a_texCoord',
             data: new Float32Array([
+                0.0, 1.0,
+                1.0, 1.0,
                 0.0, 0.0,
-                1.0, 0.0,
-                0.0, 1.0,
-                0.0, 1.0,
-                1.0, 0.0,
-                1.0, 1.0]),
+                0.0, 0.0,
+                1.0, 1.0,
+                1.0, 0.0]),
             size: 2,
             type: 'FLOAT'
         }

@@ -1,6 +1,7 @@
 import vgl from '../src/vgl';
 import transparentVideo from '../src/effects/transparent-video';
 import brightnessContrast from '../src/effects/brightness-contrast';
+import hueSaturation from '../src/effects/hue-saturation';
 
 const video = document.querySelector('#video');
 const target = document.querySelector('#target');
@@ -29,4 +30,4 @@ function check () {
     }
 }
 
-vgl.register(target, [transparentVideo, brightnessContrast]);
+vgl.register(target, [transparentVideo, hueSaturation, brightnessContrast]);
