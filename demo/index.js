@@ -426,8 +426,7 @@
      * @property {Array} data
      */
 
-    var transparentVideo = {
-        vertexSrc: `
+    const VERTEX_SRC = `
 precision mediump float;
 
 uniform vec2 u_texOffset;
@@ -443,8 +442,9 @@ void main() {
     v_texAlphaCoord = v_texColorCoord + u_texOffset;
 
     gl_Position = vec4(a_position, 0.0, 1.0);
-}`,
-        fragmentSrc: `
+}`;
+
+    const FRAGMENT_SRC = `
 precision mediump float;
 
 varying vec2 v_texColorCoord;
@@ -454,45 +454,50 @@ uniform sampler2D u_source;
 
 void main() {
     gl_FragColor = vec4(texture2D(u_source, v_texColorCoord).rgb, texture2D(u_source, v_texAlphaCoord).r);
-}`,
-        uniforms: [
-            {
-                name: 'u_texOffset',
-                size: 2,
-                type: 'f',
-                data: [0.0, -0.5]
-            }
-        ],
-        attributes: [
-            {
-                name: 'a_position',
-                data: new Float32Array([
-                    -1.0, 1.0,
-                    1.0, 1.0,
-                    -1.0, -1.0,
-                    -1.0, -1.0,
-                    1.0, 1.0,
-                    1.0, -1.0]),
-                size: 2,
-                type: 'FLOAT'
-            },
-            {
-                name: 'a_texCoord',
-                data: new Float32Array([
-                    0.0, 1.0,
-                    1.0, 1.0,
-                    0.0, 0.5,
-                    0.0, 0.5,
-                    1.0, 1.0,
-                    1.0, 0.5]),
-                size: 2,
-                type: 'FLOAT'
-            }
-        ]
-    };
+}`;
 
-    var brightnessContrast = {
-        vertexSrc: `
+    function transparentVideo () {
+        return {
+            vertexSrc: VERTEX_SRC,
+            fragmentSrc: FRAGMENT_SRC,
+            uniforms: [
+                {
+                    name: 'u_texOffset',
+                    size: 2,
+                    type: 'f',
+                    data: [0.0, -0.5]
+                }
+            ],
+            attributes: [
+                {
+                    name: 'a_position',
+                    data: new Float32Array([
+                        -1.0, 1.0,
+                        1.0, 1.0,
+                        -1.0, -1.0,
+                        -1.0, -1.0,
+                        1.0, 1.0,
+                        1.0, -1.0]),
+                    size: 2,
+                    type: 'FLOAT'
+                },
+                {
+                    name: 'a_texCoord',
+                    data: new Float32Array([
+                        0.0, 1.0,
+                        1.0, 1.0,
+                        0.0, 0.5,
+                        0.0, 0.5,
+                        1.0, 1.0,
+                        1.0, 0.5]),
+                    size: 2,
+                    type: 'FLOAT'
+                }
+            ]
+        };
+    }
+
+    const VERTEX_SRC$1 = `
 precision mediump float;
 
 attribute vec2 a_texCoord;
@@ -504,8 +509,9 @@ void main() {
     v_texCoord = a_texCoord;
 
     gl_Position = vec4(a_position, 0.0, 1.0);
-}`,
-        fragmentSrc: `
+}`;
+
+    const FRAGMENT_SRC$1 = `
 precision mediump float;
 
 varying vec2 v_texCoord;
@@ -522,51 +528,56 @@ void main() {
     color = (color - half3) * u_contrast + half3;
 
     gl_FragColor = vec4(color, pixel.a);
-}`,
-        uniforms: [
-            {
-                name: 'u_brightness',
-                size: 1,
-                type: 'f',
-                data: [1.2]
-            },
-            {
-                name: 'u_contrast',
-                size: 1,
-                type: 'f',
-                data: [2.0]
-            }
-        ],
-        attributes: [
-            {
-                name: 'a_position',
-                data: new Float32Array([
-                    -1.0, 1.0,
-                    1.0, 1.0,
-                    -1.0, -1.0,
-                    -1.0, -1.0,
-                    1.0, 1.0,
-                    1.0, -1.0]),
-                size: 2,
-                type: 'FLOAT'
-            },
-            {
-                name: 'a_texCoord',
-                data: new Float32Array([
-                    0.0, 1.0,
-                    1.0, 1.0,
-                    0.0, 0.0,
-                    0.0, 0.0,
-                    1.0, 1.0,
-                    1.0, 0.0]),
-                size: 2,
-                type: 'FLOAT'
-            }
-        ]
-    };
+}`;
 
-    var hueSaturation = {
-        vertexSrc: `
+    function brightnessContrast () {
+        return {
+            vertexSrc: VERTEX_SRC$1,
+            fragmentSrc: FRAGMENT_SRC$1,
+            uniforms: [
+                {
+                    name: 'u_brightness',
+                    size: 1,
+                    type: 'f',
+                    data: [1.2]
+                },
+                {
+                    name: 'u_contrast',
+                    size: 1,
+                    type: 'f',
+                    data: [2.0]
+                }
+            ],
+            attributes: [
+                {
+                    name: 'a_position',
+                    data: new Float32Array([
+                        -1.0, 1.0,
+                        1.0, 1.0,
+                        -1.0, -1.0,
+                        -1.0, -1.0,
+                        1.0, 1.0,
+                        1.0, -1.0]),
+                    size: 2,
+                    type: 'FLOAT'
+                },
+                {
+                    name: 'a_texCoord',
+                    data: new Float32Array([
+                        0.0, 1.0,
+                        1.0, 1.0,
+                        0.0, 0.0,
+                        0.0, 0.0,
+                        1.0, 1.0,
+                        1.0, 0.0]),
+                    size: 2,
+                    type: 'FLOAT'
+                }
+            ]
+        };
+    }
+
+    const VERTEX_SRC$2 = `
 precision mediump float;
 
 attribute vec2 a_texCoord;
@@ -585,8 +596,9 @@ void main() {
 	v_texCoord = a_texCoord;
 	
 	gl_Position = vec4(a_position, 0.0, 1.0);
-}`,
-        fragmentSrc: `
+}`;
+
+    const FRAGMENT_SRC$2 = `
 precision mediump float;
 
 uniform float u_hue;
@@ -615,48 +627,54 @@ void main() {
     pixel.rgb += adjustment;
 
     gl_FragColor = vec4(pixel.rgb, pixel.a);
-}`,
-        uniforms: [
-            {
-                name: 'u_hue',
-                size: 1,
-                type: 'f',
-                data: [0.5]
-            },
-            {
-                name: 'u_saturation',
-                size: 1,
-                type: 'f',
-                data: [0.5]
-            }
-        ],
-        attributes: [
-            {
-                name: 'a_position',
-                data: new Float32Array([
-                    -1.0, 1.0,
-                    1.0, 1.0,
-                    -1.0, -1.0,
-                    -1.0, -1.0,
-                    1.0, 1.0,
-                    1.0, -1.0]),
-                size: 2,
-                type: 'FLOAT'
-            },
-            {
-                name: 'a_texCoord',
-                data: new Float32Array([
-                    0.0, 1.0,
-                    1.0, 1.0,
-                    0.0, 0.0,
-                    0.0, 0.0,
-                    1.0, 1.0,
-                    1.0, 0.0]),
-                size: 2,
-                type: 'FLOAT'
-            }
-        ]
-    };
+}`;
+
+    function hueSaturation () {
+        return {
+            vertexSrc: VERTEX_SRC$2,
+            fragmentSrc: FRAGMENT_SRC$2,
+            uniforms: [
+                {
+                    name: 'u_hue',
+                    size: 1,
+                    type: 'f',
+                    data: [0.5]
+                },
+                {
+                    name: 'u_saturation',
+                    size: 1,
+                    type: 'f',
+                    data: [0.5]
+                }
+            ],
+            attributes: [
+                {
+                    name: 'a_position',
+                    data: new Float32Array([
+                        -1.0, 1.0,
+                        1.0, 1.0,
+                        -1.0, -1.0,
+                        -1.0, -1.0,
+                        1.0, 1.0,
+                        1.0, -1.0]),
+                    size: 2,
+                    type: 'FLOAT'
+                },
+                {
+                    name: 'a_texCoord',
+                    data: new Float32Array([
+                        0.0, 1.0,
+                        1.0, 1.0,
+                        0.0, 0.0,
+                        0.0, 0.0,
+                        1.0, 1.0,
+                        1.0, 0.0]),
+                    size: 2,
+                    type: 'FLOAT'
+                }
+            ]
+        };
+    }
 
     const video = document.querySelector('#video');
     const target = document.querySelector('#target');
@@ -685,6 +703,6 @@ void main() {
         }
     }
 
-    vgl.init(target, [transparentVideo, hueSaturation, brightnessContrast]);
+    vgl.init(target, [transparentVideo(), hueSaturation(), brightnessContrast()]);
 
 }());

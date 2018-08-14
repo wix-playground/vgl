@@ -1,5 +1,5 @@
 const videogl = require('./src/videogl');
-const brightnessContrast = require('./src/brightness-contrast');
+const brightnessContrast = require('./src/brightness-contrast')();
 const assert = require('assert');
 
 describe('videogl', function() {

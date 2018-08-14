@@ -30,4 +30,4 @@ function check () {
     }
 }
 
-vgl.init(target, [transparentVideo, hueSaturation, brightnessContrast]);
+vgl.init(target, [transparentVideo(), hueSaturation(), brightnessContrast()]);

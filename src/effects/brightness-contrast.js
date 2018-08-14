@@ -1,5 +1,4 @@
-export default {
-    vertexSrc: `
+const VERTEX_SRC = `
 precision mediump float;
 
 attribute vec2 a_texCoord;
@@ -11,8 +10,9 @@ void main() {
     v_texCoord = a_texCoord;
 
     gl_Position = vec4(a_position, 0.0, 1.0);
-}`,
-    fragmentSrc: `
+}`;
+
+const FRAGMENT_SRC = `
 precision mediump float;
 
 varying vec2 v_texCoord;
@@ -29,45 +29,51 @@ void main() {
     color = (color - half3) * u_contrast + half3;
 
     gl_FragColor = vec4(color, pixel.a);
-}`,
-    uniforms: [
-        {
-            name: 'u_brightness',
-            size: 1,
-            type: 'f',
-            data: [1.2]
-        },
-        {
-            name: 'u_contrast',
-            size: 1,
-            type: 'f',
-            data: [2.0]
-        }
-    ],
-    attributes: [
-        {
-            name: 'a_position',
-            data: new Float32Array([
-                -1.0, 1.0,
-                1.0, 1.0,
-                -1.0, -1.0,
-                -1.0, -1.0,
-                1.0, 1.0,
-                1.0, -1.0]),
-            size: 2,
-            type: 'FLOAT'
-        },
-        {
-            name: 'a_texCoord',
-            data: new Float32Array([
-                0.0, 1.0,
-                1.0, 1.0,
-                0.0, 0.0,
-                0.0, 0.0,
-                1.0, 1.0,
-                1.0, 0.0]),
-            size: 2,
-            type: 'FLOAT'
-        }
-    ]
+}`;
+
+export default function () {
+    return {
+        vertexSrc: VERTEX_SRC,
+        fragmentSrc: FRAGMENT_SRC,
+        uniforms: [
+            {
+                name: 'u_brightness',
+                size: 1,
+                type: 'f',
+                data: [1.2]
+            },
+            {
+                name: 'u_contrast',
+                size: 1,
+                type: 'f',
+                data: [2.0]
+            }
+        ],
+        attributes: [
+            {
+                name: 'a_position',
+                data: new Float32Array([
+                    -1.0, 1.0,
+                    1.0, 1.0,
+                    -1.0, -1.0,
+                    -1.0, -1.0,
+                    1.0, 1.0,
+                    1.0, -1.0]),
+                size: 2,
+                type: 'FLOAT'
+            },
+            {
+                name: 'a_texCoord',
+                data: new Float32Array([
+                    0.0, 1.0,
+                    1.0, 1.0,
+                    0.0, 0.0,
+                    0.0, 0.0,
+                    1.0, 1.0,
+                    1.0, 0.0]),
+                size: 2,
+                type: 'FLOAT'
+            }
+        ]
+    };
 };
