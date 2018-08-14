@@ -36,17 +36,31 @@ export default function () {
         vertexSrc: VERTEX_SRC,
         fragmentSrc: FRAGMENT_SRC,
         uniforms: [
+            /**
+             * 0.0 is completely black.
+             * 1.0 is no change.
+             *
+             * @min 0.0
+             * @default 1.0
+             */
             {
                 name: 'u_brightness',
                 size: 1,
                 type: 'f',
-                data: [1.2]
+                data: [1.0]
             },
+            /**
+             * 0.0 is completely gray.
+             * 1.0 is no change.
+             *
+             * @min 0.0
+             * @default 1.0
+             */
             {
                 name: 'u_contrast',
                 size: 1,
                 type: 'f',
-                data: [2.0]
+                data: [1.0]
             }
         ],
         attributes: [

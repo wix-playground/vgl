@@ -55,17 +55,35 @@ export default function () {
         vertexSrc: VERTEX_SRC,
         fragmentSrc: FRAGMENT_SRC,
         uniforms: [
+            /**
+             * 0.0 is no change.
+             * -1.0 is -180deg hue rotation.
+             * 1.0 is +180deg hue rotation.
+             *
+             * @min -1.0
+             * @max 1.0
+             * @default 0.0
+             */
             {
                 name: 'u_hue',
                 size: 1,
                 type: 'f',
-                data: [0.5]
+                data: [0.0]
             },
+            /**
+             * 0.0 is no change.
+             * -1.0 is grayscale.
+             * 1.0 is max saturation.
+             *
+             * @min -1.0
+             * @max 1.0
+             * @default 0.0
+             */
             {
                 name: 'u_saturation',
                 size: 1,
                 type: 'f',
-                data: [0.5]
+                data: [0.0]
             }
         ],
         attributes: [
