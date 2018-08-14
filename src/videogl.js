@@ -3,6 +3,7 @@ export default {
     draw,
     loop,
     stop,
+    destroy,
     resize,
     getWebGLContext
 }

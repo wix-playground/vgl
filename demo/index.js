@@ -5,9 +5,13 @@
         init,
         draw,
         loop,
+        stop,
+        destroy,
         resize,
         getWebGLContext
     };
+
+    const animationFrameIDs = new Map();
 
     function init (canvas, effects) {
         const gl = getWebGLContext(canvas);
@@ -50,7 +54,10 @@
     }
 
     function loop (gl, video, scene) {
-        window.requestAnimationFrame(() => loop(gl, video, scene));
+        const id = window.requestAnimationFrame(() => loop(gl, video, scene));
+
+        animationFrameIDs.set(gl, id);
+
         draw(gl, video, scene);
     }
 
@@ -108,6 +115,19 @@
         });
     }
 
+    function stop (gl) {
+        window.cancelAnimationFrame(animationFrameIDs.get(gl));
+
+        animationFrameIDs.delete(gl);
+    }
+
+    function destroy (gl, data) {
+        // make sure  we're not animating
+        stop(gl);
+
+        _destroy(gl, data);
+    }
+
     function _initProgram (gl, effects) {
         let lastTarget;
         const lastIndex = effects.length - 1;
@@ -151,7 +171,7 @@
             }
 
             // compile the GLSL program
-            const program = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
+            const {program, vertexShader, fragmentShader} = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
 
             // setup the vertex data
             const attribBuffers = _initVertexAttributes(gl, program, attributes);
@@ -161,6 +181,8 @@
 
             return {
                 program,
+                vertexShader,
+                fragmentShader,
                 source,
                 target,
                 attributes: attribBuffers,
@@ -195,7 +217,7 @@
         const success = gl.getProgramParameter(program, gl.LINK_STATUS);
 
         if ( success ) {
-            return program;
+            return {program, vertexShader, fragmentShader};
         }
 
         console.log(gl.getProgramInfoLog(program));
@@ -290,20 +312,57 @@
         });
     }
 
+    function _destroy (gl, data) {
+        data.forEach(layer => {
+            const {program, vertexShader, fragmentShader, source, target, attributes} = layer;
+
+            // delete buffers
+            (attributes || []).forEach(attr => gl.deleteBuffer(attr.buffer));
+
+            // delete textures and framebuffers
+            if ( source ) {
+                if ( source.texture ) {
+                    gl.deleteTexture(source.texture);
+                }
+                if ( source.buffer ) {
+                    gl.deleteFramebuffer(source.buffer);
+                }
+            }
+
+            if ( target ) {
+                if ( target.texture ) {
+                    gl.deleteTexture(target.texture);
+                }
+                if ( target.buffer ) {
+                    gl.deleteFramebuffer(target.buffer);
+                }
+            }
+
+            // delete program
+            gl.deleteProgram(program);
+
+            // delete shaders
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
+        });
+    }
+
     var vgl = {
-        register,
-        start
+        init: init$1,
+        start,
+        stop: stop$1,
+        destroy: destroy$1
     };
 
     const targets = new Map();
 
     /**
-     * Register and initialize a canvas with effects to be a target for rendering media into.
+     * Initialize a canvas with effects to be a target for rendering media into.
      *
      * @param {HTMLCanvasElement} target
      * @param {effectConfig[]} effects
      */
-    function register (target, effects) {
+    function init$1 (target, effects) {
         const scene = videogl.init(target, effects);
 
         targets.set(target, scene);
@@ -319,6 +378,32 @@
         const {gl, data} = targets.get(target);
 
         videogl.loop(gl, src, data);
+    }
+
+    /**
+     * Stop the render loop for the given source canvas.
+     *
+     * @param {HTMLCanvasElement} target
+     */
+    function stop$1 (target) {
+        const {gl, data} = targets.get(target);
+
+        videogl.stop(gl, data);
+    }
+
+    /**
+     * Detach and free all bound resources for the given target
+     *
+     * @param {HTMLCanvasElement} target
+     */
+    function destroy$1 (target) {
+        const {gl, data} = targets.get(target);
+
+        // delete all used resources
+        videogl.destroy(gl, data);
+
+        // remove cached scene from registered targets
+        targets.delete(target);
     }
 
     /**
@@ -600,6 +685,6 @@ void main() {
         }
     }
 
-    vgl.register(target, [transparentVideo, hueSaturation, brightnessContrast]);
+    vgl.init(target, [transparentVideo, hueSaturation, brightnessContrast]);
 
 }());

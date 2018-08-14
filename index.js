@@ -9,6 +9,7 @@
         draw,
         loop,
         stop,
+        destroy,
         resize,
         getWebGLContext
     };
@@ -121,6 +122,13 @@
         window.cancelAnimationFrame(animationFrameIDs.get(gl));
 
         animationFrameIDs.delete(gl);
+    }
+
+    function destroy (gl, data) {
+        // make sure  we're not animating
+        stop(gl);
+
+        _destroy(gl, data);
     }
 
     function _initProgram (gl, effects) {
@@ -304,6 +312,41 @@
             gl.enableVertexAttribArray(location);
             gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
             gl.vertexAttribPointer(location, size, gl[type], false, 0, 0);
+        });
+    }
+
+    function _destroy (gl, data) {
+        data.forEach(layer => {
+            const {program, vertexShader, fragmentShader, source, target, attributes} = layer;
+
+            // delete buffers
+            (attributes || []).forEach(attr => gl.deleteBuffer(attr.buffer));
+
+            // delete textures and framebuffers
+            if ( source ) {
+                if ( source.texture ) {
+                    gl.deleteTexture(source.texture);
+                }
+                if ( source.buffer ) {
+                    gl.deleteFramebuffer(source.buffer);
+                }
+            }
+
+            if ( target ) {
+                if ( target.texture ) {
+                    gl.deleteTexture(target.texture);
+                }
+                if ( target.buffer ) {
+                    gl.deleteFramebuffer(target.buffer);
+                }
+            }
+
+            // delete program
+            gl.deleteProgram(program);
+
+            // delete shaders
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
         });
     }
 

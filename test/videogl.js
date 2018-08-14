@@ -116,10 +116,9 @@ describe('videogl', function() {
     });
 
     describe('#resize()', function () {
-        let canvas, video, scene, gl;
+        let canvas, scene, gl;
 
         beforeEach(function () {
-            video = document.createElement('video');
             canvas = document.createElement('canvas');
 
             const initData = videogl.init(canvas, [brightnessContrast]);
@@ -150,6 +149,46 @@ describe('videogl', function() {
 
             assert.strictEqual(canvas.width, 250);
             assert.strictEqual(canvas.height, 250);
+        });
+    });
+
+    // TODO: implement
+    describe('#destroy()', function () {
+        let canvas, scene, gl;
+
+        beforeEach(function () {
+            canvas = document.createElement('canvas');
+
+            const initData = videogl.init(canvas, [brightnessContrast]);
+
+            gl = initData.gl;
+            scene = initData.data;
+        });
+
+        it('dispose of all target canvas\' resources', function () {
+            const {
+                program,
+                vertexShader,
+                fragmentShader,
+                source,
+                target,
+                attributes,
+                uniforms
+            } = scene[0];
+
+            assert.strictEqual(gl.isTexture(source.texture), true);
+            assert.strictEqual(gl.isBuffer(attributes[0].buffer), true);
+            assert.strictEqual(gl.isShader(vertexShader), true);
+            assert.strictEqual(gl.isShader(fragmentShader), true);
+            assert.strictEqual(gl.isProgram(program), true);
+
+            videogl.destroy(gl, scene);
+
+            assert.strictEqual(gl.isTexture(source.texture), false);
+            assert.strictEqual(gl.isBuffer(attributes[0].buffer), false);
+            assert.strictEqual(gl.isShader(vertexShader), false);
+            assert.strictEqual(gl.isShader(fragmentShader), false);
+            assert.strictEqual(gl.isProgram(program), false);
         });
     });
 });
