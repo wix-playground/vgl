@@ -633,7 +633,7 @@ void main() {
     
     vec3 adjustment = (pixel.r + pixel.g + pixel.b) / 3.0 - pixel.rgb;
     if (u_saturation > 0.0) {
-        adjustment *= (1.0 - 1.0 / (1.0 - u_saturation));
+        adjustment *= (1.0 - 1.0 / (1.0001 - u_saturation));
     }
     else {
         adjustment *= (-u_saturation);
