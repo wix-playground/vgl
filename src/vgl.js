@@ -3,7 +3,8 @@ import videogl from './videogl';
 export default {
     init,
     start,
-    stop
+    stop,
+    destroy
 }
 
 const targets = new Map();
@@ -32,6 +33,11 @@ function start (target, src) {
     videogl.loop(gl, src, data);
 }
 
+/**
+ * Stop the render loop for the given source canvas.
+ *
+ * @param {HTMLCanvasElement} target
+ */
 function stop (target) {
     const {gl, data} = targets.get(target);
 
