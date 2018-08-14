@@ -535,17 +535,31 @@ void main() {
             vertexSrc: VERTEX_SRC$1,
             fragmentSrc: FRAGMENT_SRC$1,
             uniforms: [
+                /**
+                 * 0.0 is completely black.
+                 * 1.0 is no change.
+                 *
+                 * @min 0.0
+                 * @default 1.0
+                 */
                 {
                     name: 'u_brightness',
                     size: 1,
                     type: 'f',
-                    data: [1.2]
+                    data: [1.0]
                 },
+                /**
+                 * 0.0 is completely gray.
+                 * 1.0 is no change.
+                 *
+                 * @min 0.0
+                 * @default 1.0
+                 */
                 {
                     name: 'u_contrast',
                     size: 1,
                     type: 'f',
-                    data: [2.0]
+                    data: [1.0]
                 }
             ],
             attributes: [
@@ -634,17 +648,35 @@ void main() {
             vertexSrc: VERTEX_SRC$2,
             fragmentSrc: FRAGMENT_SRC$2,
             uniforms: [
+                /**
+                 * 0.0 is no change.
+                 * -1.0 is -180deg hue rotation.
+                 * 1.0 is +180deg hue rotation.
+                 *
+                 * @min -1.0
+                 * @max 1.0
+                 * @default 0.0
+                 */
                 {
                     name: 'u_hue',
                     size: 1,
                     type: 'f',
-                    data: [0.5]
+                    data: [0.0]
                 },
+                /**
+                 * 0.0 is no change.
+                 * -1.0 is grayscale.
+                 * 1.0 is max saturation.
+                 *
+                 * @min -1.0
+                 * @max 1.0
+                 * @default 0.0
+                 */
                 {
                     name: 'u_saturation',
                     size: 1,
                     type: 'f',
-                    data: [0.5]
+                    data: [0.0]
                 }
             ],
             attributes: [
@@ -703,6 +735,39 @@ void main() {
         }
     }
 
-    vgl.init(target, [transparentVideo(), hueSaturation(), brightnessContrast()]);
+    function handleRangeChange (e) {
+        const target = e.target;
+        const effect = target.id;
+        let data;
+
+        switch ( effect ) {
+            case 'brightness':
+            case 'contrast':
+                data = bc.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
+                break;
+            case 'hue':
+            case 'saturation':
+                data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
+                break;
+        }
+
+        if ( data ) {
+            data[0] = parseFloat(target.value);
+            e.target.nextElementSibling.textContent = data[0];
+        }
+    }
+
+    const inputs = ['brightness', 'contrast', 'hue', 'saturation'];
+    const hs = hueSaturation();
+    const bc = brightnessContrast();
+
+    inputs.map(function (name) {
+        return document.getElementById(name);
+    })
+        .map(function (input) {
+            input.addEventListener('input', handleRangeChange);
+        });
+
+    vgl.init(target, [transparentVideo(), hs, bc]);
 
 }());
