@@ -114,7 +114,14 @@ function draw (gl, video, data) {
 function stop (gl) {
     window.cancelAnimationFrame(animationFrameIDs.get(gl));
 
-    // _destroy(gl, data);
+    animationFrameIDs.delete(gl);
+}
+
+function destroy (gl, data) {
+    // make sure  we're not animating
+    stop(gl);
+
+    _destroy(gl, data);
 }
 
 function _initProgram (gl, effects) {
@@ -160,7 +167,7 @@ function _initProgram (gl, effects) {
         }
 
         // compile the GLSL program
-        const program = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
+        const {program, vertexShader, fragmentShader} = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
 
         // setup the vertex data
         const attribBuffers = _initVertexAttributes(gl, program, attributes);
@@ -170,6 +177,8 @@ function _initProgram (gl, effects) {
 
         return {
             program,
+            vertexShader,
+            fragmentShader,
             source,
             target,
             attributes: attribBuffers,
@@ -204,7 +213,7 @@ function _createProgram (gl, vertexShader, fragmentShader) {
     const success = gl.getProgramParameter(program, gl.LINK_STATUS);
 
     if ( success ) {
-        return program;
+        return {program, vertexShader, fragmentShader};
     }
 
     console.log(gl.getProgramInfoLog(program));
@@ -299,6 +308,37 @@ function _enableVertexAttributes (gl, attributes) {
     });
 }
 
-// function _destroy (gl, data) {
-    // TBD
-// }
+function _destroy (gl, data) {
+    data.forEach(layer => {
+        const {program, vertexShader, fragmentShader, source, target, attributes} = layer;
+
+        // delete buffers
+        (attributes || []).forEach(attr => gl.deleteBuffer(attr.buffer));
+
+        // delete textures and framebuffers
+        if ( source ) {
+            if ( source.texture ) {
+                gl.deleteTexture(source.texture);
+            }
+            if ( source.buffer ) {
+                gl.deleteFramebuffer(source.buffer);
+            }
+        }
+
+        if ( target ) {
+            if ( target.texture ) {
+                gl.deleteTexture(target.texture);
+            }
+            if ( target.buffer ) {
+                gl.deleteFramebuffer(target.buffer);
+            }
+        }
+
+        // delete program
+        gl.deleteProgram(program);
+
+        // delete shaders
+        gl.deleteShader(vertexShader);
+        gl.deleteShader(fragmentShader);
+    });
+}

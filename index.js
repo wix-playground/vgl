@@ -120,7 +120,7 @@
     function stop (gl) {
         window.cancelAnimationFrame(animationFrameIDs.get(gl));
 
-        // _destroy(gl, data);
+        animationFrameIDs.delete(gl);
     }
 
     function _initProgram (gl, effects) {
@@ -166,7 +166,7 @@
             }
 
             // compile the GLSL program
-            const program = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
+            const {program, vertexShader, fragmentShader} = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
 
             // setup the vertex data
             const attribBuffers = _initVertexAttributes(gl, program, attributes);
@@ -176,6 +176,8 @@
 
             return {
                 program,
+                vertexShader,
+                fragmentShader,
                 source,
                 target,
                 attributes: attribBuffers,
@@ -210,7 +212,7 @@
         const success = gl.getProgramParameter(program, gl.LINK_STATUS);
 
         if ( success ) {
-            return program;
+            return {program, vertexShader, fragmentShader};
         }
 
         console.log(gl.getProgramInfoLog(program));
@@ -305,14 +307,11 @@
         });
     }
 
-    // function _destroy (gl, data) {
-        // TBD
-    // }
-
     var vgl = {
         init: init$1,
         start,
-        stop: stop$1
+        stop: stop$1,
+        destroy: destroy$1
     };
 
     const targets = new Map();
@@ -341,10 +340,30 @@
         videogl.loop(gl, src, data);
     }
 
+    /**
+     * Stop the render loop for the given source canvas.
+     *
+     * @param {HTMLCanvasElement} target
+     */
     function stop$1 (target) {
         const {gl, data} = targets.get(target);
 
         videogl.stop(gl, data);
+    }
+
+    /**
+     * Detach and free all bound resources for the given target
+     *
+     * @param {HTMLCanvasElement} target
+     */
+    function destroy$1 (target) {
+        const {gl, data} = targets.get(target);
+
+        // delete all used resources
+        videogl.destroy(gl, data);
+
+        // remove cached scene from registered targets
+        targets.delete(target);
     }
 
     /**

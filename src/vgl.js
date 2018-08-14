@@ -45,6 +45,21 @@ function stop (target) {
 }
 
 /**
+ * Detach and free all bound resources for the given target
+ *
+ * @param {HTMLCanvasElement} target
+ */
+function destroy (target) {
+    const {gl, data} = targets.get(target);
+
+    // delete all used resources
+    videogl.destroy(gl, data);
+
+    // remove cached scene from registered targets
+    targets.delete(target);
+}
+
+/**
  * @typedef {Object} effectConfig
  * @property {string} vertexSrc
  * @property {string} fragmentSrc
