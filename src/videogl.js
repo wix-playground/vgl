@@ -2,9 +2,12 @@ export default {
     init,
     draw,
     loop,
+    stop,
     resize,
     getWebGLContext
 }
+
+const animationFrameIDs = new Map();
 
 function init (canvas, effects) {
     const gl = getWebGLContext(canvas);
@@ -47,7 +50,10 @@ function resize (gl) {
 }
 
 function loop (gl, video, scene) {
-    window.requestAnimationFrame(() => loop(gl, video, scene));
+    const id = window.requestAnimationFrame(() => loop(gl, video, scene));
+
+    animationFrameIDs.set(gl, id);
+
     draw(gl, video, scene);
 }
 
@@ -103,6 +109,12 @@ function draw (gl, video, data) {
         // Draw the rectangle.
         gl.drawArrays(gl.TRIANGLES, 0, 6);
     });
+}
+
+function stop (gl) {
+    window.cancelAnimationFrame(animationFrameIDs.get(gl));
+
+    // _destroy(gl, data);
 }
 
 function _initProgram (gl, effects) {
@@ -286,3 +298,7 @@ function _enableVertexAttributes (gl, attributes) {
         gl.vertexAttribPointer(location, size, gl[type], false, 0, 0);
     });
 }
+
+// function _destroy (gl, data) {
+    // TBD
+// }

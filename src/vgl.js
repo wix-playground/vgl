@@ -1,19 +1,20 @@
 import videogl from './videogl';
 
 export default {
-    register,
-    start
+    init,
+    start,
+    stop
 }
 
 const targets = new Map();
 
 /**
- * Register and initialize a canvas with effects to be a target for rendering media into.
+ * Initialize a canvas with effects to be a target for rendering media into.
  *
  * @param {HTMLCanvasElement} target
  * @param {effectConfig[]} effects
  */
-function register (target, effects) {
+function init (target, effects) {
     const scene = videogl.init(target, effects);
 
     targets.set(target, scene);
@@ -29,6 +30,12 @@ function start (target, src) {
     const {gl, data} = targets.get(target);
 
     videogl.loop(gl, src, data);
+}
+
+function stop (target) {
+    const {gl, data} = targets.get(target);
+
+    videogl.stop(gl, data);
 }
 
 /**

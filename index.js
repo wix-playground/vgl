@@ -8,9 +8,12 @@
         init,
         draw,
         loop,
+        stop,
         resize,
         getWebGLContext
     };
+
+    const animationFrameIDs = new Map();
 
     function init (canvas, effects) {
         const gl = getWebGLContext(canvas);
@@ -53,7 +56,10 @@
     }
 
     function loop (gl, video, scene) {
-        window.requestAnimationFrame(() => loop(gl, video, scene));
+        const id = window.requestAnimationFrame(() => loop(gl, video, scene));
+
+        animationFrameIDs.set(gl, id);
+
         draw(gl, video, scene);
     }
 
@@ -109,6 +115,12 @@
             // Draw the rectangle.
             gl.drawArrays(gl.TRIANGLES, 0, 6);
         });
+    }
+
+    function stop (gl) {
+        window.cancelAnimationFrame(animationFrameIDs.get(gl));
+
+        // _destroy(gl, data);
     }
 
     function _initProgram (gl, effects) {
@@ -293,20 +305,25 @@
         });
     }
 
+    // function _destroy (gl, data) {
+        // TBD
+    // }
+
     var vgl = {
-        register,
-        start
+        init: init$1,
+        start,
+        stop: stop$1
     };
 
     const targets = new Map();
 
     /**
-     * Register and initialize a canvas with effects to be a target for rendering media into.
+     * Initialize a canvas with effects to be a target for rendering media into.
      *
      * @param {HTMLCanvasElement} target
      * @param {effectConfig[]} effects
      */
-    function register (target, effects) {
+    function init$1 (target, effects) {
         const scene = videogl.init(target, effects);
 
         targets.set(target, scene);
@@ -322,6 +339,12 @@
         const {gl, data} = targets.get(target);
 
         videogl.loop(gl, src, data);
+    }
+
+    function stop$1 (target) {
+        const {gl, data} = targets.get(target);
+
+        videogl.stop(gl, data);
     }
 
     /**
