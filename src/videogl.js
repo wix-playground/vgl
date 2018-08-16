@@ -10,14 +10,29 @@ export default {
 
 const animationFrameIDs = new Map();
 
-function init (canvas, effects) {
+/**
+ * Initialize a rendering context and compiled WebGLProgram for the given canvas and effects.
+ *
+ * @param {HTMLCanvasElement} canvas
+ * @param effects
+ * @param dimensions
+ * @return {{gl: WebGLRenderingContext, data: vglSceneData, [dimensions]: {width: number, height: number}}}
+ */
+function init (canvas, effects, dimensions) {
     const gl = getWebGLContext(canvas);
 
-    const programData = _initProgram(gl, effects);
+    const programData = _initProgram(gl, effects, dimensions);
 
-    return {gl, data: programData};
+    return {gl, data: programData, dimensions: dimensions || {}};
 }
 
+/**
+ * Get a webgl context for the given canvas element.
+ *
+ *
+ * @param {HTMLCanvasElement} canvas
+ * @return {WebGLRenderingContext}
+ */
 function getWebGLContext (canvas) {
     return canvas.getContext('webgl', {
         preserveDrawingBuffer: false, // should improve performance - https://stackoverflow.com/questions/27746091/preservedrawingbuffer-false-is-it-worth-the-effort
@@ -26,17 +41,32 @@ function getWebGLContext (canvas) {
     });
 }
 
-function resize (gl) {
+/**
+ * Resize the target canvas.
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {{width: number, height: number}} [dimensions]
+ * @return {boolean}
+ */
+function resize (gl, dimensions) {
     let resized = false;
     const canvas = gl.canvas;
     const realToCSSPixels = 1; //window.devicePixelRatio;
+    const {width, height} = dimensions || {};
+    let displayWidth, displayHeight;
 
-    // Lookup the size the browser is displaying the canvas.
-    const displayWidth  = Math.floor(canvas.clientWidth * realToCSSPixels);
-    const displayHeight = Math.floor(canvas.clientHeight * realToCSSPixels);
+    if ( width && height ) {
+        displayWidth = width;
+        displayHeight = height;
+    }
+    else {
+        // Lookup the size the browser is displaying the canvas.
+        displayWidth = Math.floor(canvas.clientWidth * realToCSSPixels);
+        displayHeight = Math.floor(canvas.clientHeight * realToCSSPixels);
+    }
 
     // Check if the canvas is not the same size.
-    if ( canvas.width  !== displayWidth ||
+    if ( canvas.width !== displayWidth ||
          canvas.height !== displayHeight ) {
 
         // Make the canvas the same size
@@ -50,21 +80,37 @@ function resize (gl) {
     return resized;
 }
 
-function loop (gl, video, scene) {
-    const id = window.requestAnimationFrame(() => loop(gl, video, scene));
+/**
+ * Start an animation loop that draws given video to target webgl context.
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {HTMLVideoElement} video
+ * @param {vglSceneData} data
+ * @param {{width: number, height: number}} dimensions
+ */
+function loop (gl, video, data, dimensions) {
+    const id = window.requestAnimationFrame(() => loop(gl, video, data, dimensions));
 
     animationFrameIDs.set(gl, id);
 
-    draw(gl, video, scene);
+    draw(gl, video, data, dimensions);
 }
 
-function draw (gl, video, data) {
+/**
+ * Draw a given scene
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {HTMLVideoElement} video
+ * @param {vglSceneData} data
+ * @param {{width: number, height: number}} dimensions
+ */
+function draw (gl, video, data, dimensions) {
     // resize the target canvas if its size in the DOM changed
-    const resized = resize(gl);
+    const resized = resize(gl, dimensions);
 
     // these two fix bad dithered junk edges rendered in Safari
     // gl.enable(gl.BLEND);
-    // gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA);
+    // gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);
 
     data.forEach(layer => {
         const {program, source, target, attributes, uniforms} = layer;
@@ -79,13 +125,8 @@ function draw (gl, video, data) {
         // if source has no buffer then the media is the actual source
         if ( source.buffer === null ) {
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-            // tell webgl we're reading premultiplied data
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
 
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
-        }
-        else {
-            gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
         }
 
         if ( resized && isBufferTarget ) {
@@ -112,12 +153,23 @@ function draw (gl, video, data) {
     });
 }
 
+/**
+ * Stop an animation loop related to the given target webgl context.
+ *
+ * @param {WebGLRenderingContext} gl
+ */
 function stop (gl) {
     window.cancelAnimationFrame(animationFrameIDs.get(gl));
 
     animationFrameIDs.delete(gl);
 }
 
+/**
+ * Free all resources attached to a specific webgl context.
+ *
+ * @param {WebGLRenderingContext} gl
+ * @param {vglSceneData} data
+ */
 function destroy (gl, data) {
     // make sure  we're not animating
     stop(gl);
@@ -125,12 +177,13 @@ function destroy (gl, data) {
     _destroy(gl, data);
 }
 
-function _initProgram (gl, effects) {
+function _initProgram (gl, effects, dimensions) {
     let lastTarget;
     const lastIndex = effects.length - 1;
 
     return effects.map((config, i) => {
         const {vertexSrc, fragmentSrc, attributes, uniforms} = config;
+        const {width, height} = dimensions || {};
 
         let source;
         let target = null;
@@ -150,7 +203,7 @@ function _initProgram (gl, effects) {
         if ( i !== lastIndex ) {
             // Prepare a framebuffer as a target to render to
             // create a secondary target texture to render the source media into
-            const targetTexture = _createTexture(gl);
+            const targetTexture = _createTexture(gl, width, height);
 
             // Create and bind the framebuffer
             const framebuffer = gl.createFramebuffer();
@@ -343,3 +396,28 @@ function _destroy (gl, data) {
         gl.deleteShader(fragmentShader);
     });
 }
+
+/**
+ * @typedef {vglLayer[]} vglSceneData
+ *
+ * @typedef {Object} vglLayer
+ * @property {WebGLProgram} program
+ * @property {WebGLShader} vertexShader
+ * @property {WebGLShader} fragmentShader
+ * @property {vglLayerTarget} source
+ * @property {vglLayerTarget} target
+ * @property {vglAttribute[]} attributes
+ *
+ * @typedef {Object} vglLayerTarget
+ * @property {WebGLTexture} texture
+ * @property {WebGLFramebuffer|null} buffer
+ * @property {number} [width]
+ * @property {number} [height]
+ *
+ * @typedef {Object} vglAttribute
+ * @property {string} name
+ * @property {GLint} location
+ * @property {WebGLBuffer} buffer
+ * @property {string} type
+   @property {number} size
+ */

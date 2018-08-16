@@ -4,6 +4,7 @@ import babel from 'rollup-plugin-babel';
 const config = {
     experimentalCodeSplitting: true,
     input: [
+        '../src/vgl.js',
         '../src/videogl.js',
         '../src/effects/brightness-contrast.js'
     ],

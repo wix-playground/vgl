@@ -25,6 +25,8 @@ describe('videogl', function() {
 
             assert(gl);
             assert(data);
+
+            videogl.destroy(gl, data);
         });
 
         it('should return scene data with complete WebGL program data', function() {
@@ -53,6 +55,8 @@ describe('videogl', function() {
             assert.strictEqual(target, null);
             assert(attributes);
             assert(uniforms);
+
+            videogl.destroy(gl, data);
         });
     });
 
@@ -72,6 +76,10 @@ describe('videogl', function() {
 
         it('should draw blank video to the target canvas', function () {
             videogl.draw(gl, video, scene);
+        });
+
+        afterEach(function () {
+            videogl.destroy(gl, scene);
         });
     });
 
@@ -93,6 +101,10 @@ describe('videogl', function() {
             videogl.loop(gl, video, scene);
             videogl.stop(gl, video, scene);
         });
+
+        afterEach(function () {
+            videogl.destroy(gl, scene);
+        });
     });
 
     // TODO: implement
@@ -112,6 +124,10 @@ describe('videogl', function() {
         it('should stop a started drawing loop', function () {
             videogl.loop(gl, video, scene);
             videogl.stop(gl, video, scene);
+        });
+
+        afterEach(function () {
+            videogl.destroy(gl, scene);
         });
     });
 
@@ -149,6 +165,19 @@ describe('videogl', function() {
 
             assert.strictEqual(canvas.width, 250);
             assert.strictEqual(canvas.height, 250);
+        });
+
+        it('should resize target to supplied dimensions and ignore canvas CSS dimensions', function () {
+            assert.strictEqual(canvas.height, 150);
+
+            videogl.resize(gl, {width: 850, height: 480});
+
+            assert.strictEqual(gl.drawingBufferWidth, 850);
+            assert.strictEqual(gl.drawingBufferHeight, 480);
+        });
+
+        afterEach(function () {
+            videogl.destroy(gl, scene);
         });
     });
 

@@ -1,1 +1,2 @@
 require('./videogl');
+require('./vgl');
