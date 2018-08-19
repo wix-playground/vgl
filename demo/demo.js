@@ -26,7 +26,7 @@ function isTimeupdate () {
 
 function check () {
     if (playing && timeupdate) {
-        vgl.start(target, video);
+        instance.start(video);
     }
 }
 
@@ -63,4 +63,4 @@ inputs.map(function (name) {
         input.addEventListener('input', handleRangeChange);
     });
 
-vgl.init(target, [transparentVideo(), hs, bc]);
+const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc], source: {width: 1920, height: 1080}});

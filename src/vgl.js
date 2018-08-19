@@ -144,9 +144,12 @@ class Vgl {
             media = source;
         }
 
+        if ( width && height ) {
+            this.dimensions = { width, height };
+        }
+
         this.media = media;
-        this.type = type;
-        this.dimensions = { width, height };
+        this.type = type || this.type;
     }
 }
 
