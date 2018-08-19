@@ -53,7 +53,16 @@ function destroy (target) {
     targets.delete(target);
 }
 
+/**
+ * @class Vgl
+ */
 class Vgl {
+    /**
+     * Initialize a webgl target with video source and effects, and start animation loop.
+     *
+     * @constructor
+     * @param {{target: HTMLCanvasElement, source: (HTMLVideoElement|Object), effects: effectConfig[]}} config
+     */
     constructor (config) {
         this.init(config);
 
@@ -73,13 +82,13 @@ class Vgl {
             media = source;
         }
 
-        const {gl, data} = videogl.init(target, effects, { width, height });
+        const {gl, data, dimensions} = videogl.init(target, effects, { width, height });
 
         this.gl = gl;
         this.data = data;
         this.media = media;
         this.type = type;
-        this.dimensions = {width, height};
+        this.dimensions = dimensions;
     }
 
     start () {
@@ -103,6 +112,8 @@ class Vgl {
         this.gl = null;
         this.data = null;
         this.media = null;
+        this.type = null;
+        this.dimensions = null;
     }
 }
 

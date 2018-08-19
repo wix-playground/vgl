@@ -116,7 +116,7 @@
 
        // these two fix bad dithered junk edges rendered in Safari
        // gl.enable(gl.BLEND);
-       // gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);
+       // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
        data.forEach(layer => {
            const {program, source, target, attributes, uniforms} = layer;
@@ -428,14 +428,6 @@
       @property {number} size
     */
 
-   var vgl = {
-       init: init$1,
-       start,
-       stop: stop$1,
-       destroy: destroy$1,
-       Vgl
-   };
-
    const targets = new Map();
 
    /**
@@ -489,7 +481,16 @@
        targets.delete(target);
    }
 
+   /**
+    * @class Vgl
+    */
    class Vgl {
+       /**
+        * Initialize a webgl target with video source and effects, and start animation loop.
+        *
+        * @constructor
+        * @param {{target: HTMLCanvasElement, source: (HTMLVideoElement|Object), effects: effectConfig[]}} config
+        */
        constructor (config) {
            this.init(config);
 
@@ -509,13 +510,13 @@
                media = source;
            }
 
-           const {gl, data} = init$1(target, effects, { width, height });
+           const {gl, data, dimensions} = videogl.init(target, effects, { width, height });
 
            this.gl = gl;
            this.data = data;
            this.media = media;
            this.type = type;
-           this.dimensions = {width, height};
+           this.dimensions = dimensions;
        }
 
        start () {
@@ -539,6 +540,8 @@
            this.gl = null;
            this.data = null;
            this.media = null;
+           this.type = null;
+           this.dimensions = null;
        }
    }
 
@@ -561,6 +564,14 @@
     * @property {string} type
     * @property {Array} data
     */
+
+   var vgl = {
+       init: init$1,
+       start,
+       stop: stop$1,
+       destroy: destroy$1,
+       Vgl
+   };
 
    return vgl;
 

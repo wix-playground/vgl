@@ -7,6 +7,7 @@
     "build": "rollup -c",
     "watch": "rollup -c -w",
     "demo": "cd demo && rollup -c && cd -",
+    "watch:demo": "cd demo && rollup -c -w && cd -",
     "test:unit": "floss --path test/index.js",
     "test:build": "cd test && rollup -c && cd -",
     "test": "npm run test:build && npm run test:unit"

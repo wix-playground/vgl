@@ -13,7 +13,7 @@ void main() {
     v_texColorCoord = a_texCoord;
     v_texAlphaCoord = v_texColorCoord + u_texOffset;
 
-    gl_Position = vec4(a_position, 0.0, 1.0);
+    gl_Position = vec4(a_position.xy, 0.0, 1.0);
 }`;
 
 const FRAGMENT_SRC = `
@@ -25,7 +25,9 @@ varying vec2 v_texAlphaCoord;
 uniform sampler2D u_source;
 
 void main() {
-    gl_FragColor = vec4(texture2D(u_source, v_texColorCoord).rgb, texture2D(u_source, v_texAlphaCoord).r);
+    float luma = texture2D(u_source, v_texAlphaCoord).r;
+    vec3 color = texture2D(u_source, v_texColorCoord).rgb;
+    gl_FragColor = vec4(color, luma);
 }`;
 
 export default function () {

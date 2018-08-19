@@ -113,7 +113,7 @@
 
        // these two fix bad dithered junk edges rendered in Safari
        // gl.enable(gl.BLEND);
-       // gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);
+       // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
        data.forEach(layer => {
            const {program, source, target, attributes, uniforms} = layer;
@@ -478,7 +478,16 @@
        targets.delete(target);
    }
 
+   /**
+    * @class Vgl
+    */
    class Vgl {
+       /**
+        * Initialize a webgl target with video source and effects, and start animation loop.
+        *
+        * @constructor
+        * @param {{target: HTMLCanvasElement, source: (HTMLVideoElement|Object), effects: effectConfig[]}} config
+        */
        constructor (config) {
            this.init(config);
 
@@ -498,13 +507,13 @@
                media = source;
            }
 
-           const {gl, data} = videogl.init(target, effects, { width, height });
+           const {gl, data, dimensions} = videogl.init(target, effects, { width, height });
 
            this.gl = gl;
            this.data = data;
            this.media = media;
            this.type = type;
-           this.dimensions = {width, height};
+           this.dimensions = dimensions;
        }
 
        start () {
@@ -528,6 +537,8 @@
            this.gl = null;
            this.data = null;
            this.media = null;
+           this.type = null;
+           this.dimensions = null;
        }
    }
 
@@ -574,7 +585,7 @@ void main() {
     v_texColorCoord = a_texCoord;
     v_texAlphaCoord = v_texColorCoord + u_texOffset;
 
-    gl_Position = vec4(a_position, 0.0, 1.0);
+    gl_Position = vec4(a_position.xy, 0.0, 1.0);
 }`;
 
    const FRAGMENT_SRC = `
@@ -586,7 +597,9 @@ varying vec2 v_texAlphaCoord;
 uniform sampler2D u_source;
 
 void main() {
-    gl_FragColor = vec4(texture2D(u_source, v_texColorCoord).rgb, texture2D(u_source, v_texAlphaCoord).r);
+    float luma = texture2D(u_source, v_texAlphaCoord).r;
+    vec3 color = texture2D(u_source, v_texColorCoord).rgb;
+    gl_FragColor = vec4(color, luma);
 }`;
 
    function transparentVideo () {

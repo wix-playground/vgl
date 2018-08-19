@@ -110,7 +110,7 @@ function draw (gl, video, data, dimensions) {
 
     // these two fix bad dithered junk edges rendered in Safari
     // gl.enable(gl.BLEND);
-    // gl.blendFunc(gl.SRC_ALPHA, gl.ZERO);
+    // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
     data.forEach(layer => {
         const {program, source, target, attributes, uniforms} = layer;
