@@ -5,6 +5,7 @@ const targets = new Map();
 /**
  * Initialize a canvas with effects to be a target for rendering media into.
  *
+ * @name vgl.init
  * @param {HTMLCanvasElement} target
  * @param {effectConfig[]} effects
  * @param {{width: number, height: number}} [dimensions]
@@ -18,6 +19,7 @@ function init (target, effects, dimensions) {
 /**
  * Start render loop of source media into target canvas.
  *
+ * @name vgl.start
  * @param {HTMLCanvasElement} target
  * @param {HTMLVideoElement} src
  */
@@ -30,6 +32,7 @@ function start (target, src) {
 /**
  * Stop the render loop for the given source canvas.
  *
+ * @name vgl.stop
  * @param {HTMLCanvasElement} target
  */
 function stop (target) {
@@ -41,6 +44,7 @@ function stop (target) {
 /**
  * Detach and free all bound resources for the given target
  *
+ * @name vgl.destroy
  * @param {HTMLCanvasElement} target
  */
 function destroy (target) {
@@ -54,14 +58,14 @@ function destroy (target) {
 }
 
 /**
+ * Initialize a webgl target with video source and effects, and start animation loop.
+ *
  * @class Vgl
+ * @param {VglConfig} config
  */
 class Vgl {
     /**
-     * Initialize a webgl target with video source and effects, and start animation loop.
-     *
      * @constructor
-     * @param {{target: HTMLCanvasElement, source: (HTMLVideoElement|Object), effects: effectConfig[]}} config
      */
     constructor (config) {
         this.init(config);
@@ -71,39 +75,53 @@ class Vgl {
         }
     }
 
+    /**
+     * Initializes a Vgl instance.
+     * This is called inside the constructor, but can be called again after {@Vgl#desotry()}.
+     *
+     * @param {VglConfig} config
+     */
     init (config) {
         const {source, target, effects} = config;
-        let type, media, width, height;
 
-        if ( Object.prototype.toString.call(source) === '[object Object]' ) {
-            ({type, media, width, height} = source);
-        }
-        else {
-            media = source;
-        }
+        this._initMedia(source);
 
-        const {gl, data, dimensions} = videogl.init(target, effects, { width, height });
+        const {gl, data} = videogl.init(target, effects, this.dimensions);
 
         this.gl = gl;
         this.data = data;
-        this.media = media;
-        this.type = type;
-        this.dimensions = dimensions;
+
     }
 
-    start () {
+    /**
+     * Starts the animation loop.
+     *
+     * @param {HTMLVideoElement|VglConfigSource} [source]
+     */
+    start (source) {
         const loop = () => {
             this.animationFrameId = window.requestAnimationFrame(loop);
             videogl.draw(this.gl, this.media, this.data, this.dimensions);
         };
+
+        if ( source ) {
+            this._initMedia(source);
+        }
+
         this.animationFrameId = window.requestAnimationFrame(loop);
     }
 
+    /**
+     * Stops the animation loop.
+     */
     stop () {
         window.cancelAnimationFrame(this.animationFrameId);
         this.animationFrameId = null;
     }
 
+    /**
+     * Stops animation loop and frees all resources.
+     */
     destroy () {
         this.stop();
 
@@ -115,7 +133,37 @@ class Vgl {
         this.type = null;
         this.dimensions = null;
     }
+
+    _initMedia (source) {
+        let type, media, width, height;
+
+        if ( Object.prototype.toString.call(source) === '[object Object]' ) {
+            ({type, media, width, height} = source);
+        }
+        else {
+            media = source;
+        }
+
+        this.media = media;
+        this.type = type;
+        this.dimensions = { width, height };
+    }
 }
+
+/**
+ * @typedef {Object} VglConfig
+ * @property {HTMLCanvasElement} target
+ * @property {HTMLVideoElement|VglConfigSource} source
+ * @property {effectConfig[]} effects
+ */
+
+/**
+ * @typedef {Object} VglConfigSource
+ * @property {HTMLVideoElement} media
+ * @property {string} type
+ * @property {number} width
+ * @property {number} height
+ */
 
 /**
  * @typedef {Object} effectConfig
@@ -123,13 +171,17 @@ class Vgl {
  * @property {string} fragmentSrc
  * @property {Attribute[]} attributes
  * @property {Uniform[]} uniforms
- *
+ */
+
+/**
  * @typedef {Object} Attribute
  * @property {string} name
  * @property {number} size
  * @property {string} type
  * @property {ArrayBufferView} data
- *
+ */
+
+/**
  * @typedef {Object} Uniform
  * @property {string} name
  * @property {number} size

@@ -17,6 +17,7 @@ describe('vgl', function() {
             assert(instance);
             assert(instance.gl instanceof WebGLRenderingContext);
             assert(instance.data);
+            assert(instance.data[0].target === null);
             assert(instance.media instanceof HTMLVideoElement);
             assert(instance.animationFrameId);
         });

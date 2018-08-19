@@ -10,7 +10,8 @@
     "watch:demo": "cd demo && rollup -c -w && cd -",
     "test:unit": "floss --path test/index.js",
     "test:build": "cd test && rollup -c && cd -",
-    "test": "npm run test:build && npm run test:unit"
+    "test": "npm run test:build && npm run test:unit",
+    "docs": "documentation build src/vgl.js -f html -o docs --shallow"
   },
   "repository": {
     "type": "git",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
+    "documentation": "^8.1.1",
     "electron": "^2.0.7",
     "floss": "^2.1.5",
     "rollup": "^0.64.1",
