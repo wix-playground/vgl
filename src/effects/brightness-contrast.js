@@ -67,24 +67,20 @@ export default function () {
             {
                 name: 'a_position',
                 data: new Float32Array([
+                    -1.0, -1.0,
                     -1.0, 1.0,
-                    1.0, 1.0,
-                    -1.0, -1.0,
-                    -1.0, -1.0,
-                    1.0, 1.0,
-                    1.0, -1.0]),
+                    1.0, -1.0,
+                    1.0, 1.0]),
                 size: 2,
                 type: 'FLOAT'
             },
             {
                 name: 'a_texCoord',
                 data: new Float32Array([
+                    0.0, 0.0,
                     0.0, 1.0,
-                    1.0, 1.0,
-                    0.0, 0.0,
-                    0.0, 0.0,
-                    1.0, 1.0,
-                    1.0, 0.0]),
+                    1.0, 0.0,
+                    1.0, 1.0]),
                 size: 2,
                 type: 'FLOAT'
             }

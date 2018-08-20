@@ -175,7 +175,7 @@
            // gl.clear(gl.COLOR_BUFFER_BIT);
 
            // Draw the rectangle.
-           gl.drawArrays(gl.TRIANGLES, 0, 6);
+           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
        });
    }
 
@@ -696,24 +696,20 @@ void main() {
                {
                    name: 'a_position',
                    data: new Float32Array([
+                       -1.0, -1.0,
                        -1.0, 1.0,
-                       1.0, 1.0,
-                       -1.0, -1.0,
-                       -1.0, -1.0,
-                       1.0, 1.0,
-                       1.0, -1.0]),
+                       1.0, -1.0,
+                       1.0, 1.0]),
                    size: 2,
                    type: 'FLOAT'
                },
                {
                    name: 'a_texCoord',
                    data: new Float32Array([
+                       0.0, 0.5,
                        0.0, 1.0,
-                       1.0, 1.0,
-                       0.0, 0.5,
-                       0.0, 0.5,
-                       1.0, 1.0,
-                       1.0, 0.5]),
+                       1.0, 0.5,
+                       1.0, 1.0]),
                    size: 2,
                    type: 'FLOAT'
                }
@@ -790,24 +786,20 @@ void main() {
                {
                    name: 'a_position',
                    data: new Float32Array([
+                       -1.0, -1.0,
                        -1.0, 1.0,
-                       1.0, 1.0,
-                       -1.0, -1.0,
-                       -1.0, -1.0,
-                       1.0, 1.0,
-                       1.0, -1.0]),
+                       1.0, -1.0,
+                       1.0, 1.0]),
                    size: 2,
                    type: 'FLOAT'
                },
                {
                    name: 'a_texCoord',
                    data: new Float32Array([
+                       0.0, 0.0,
                        0.0, 1.0,
-                       1.0, 1.0,
-                       0.0, 0.0,
-                       0.0, 0.0,
-                       1.0, 1.0,
-                       1.0, 0.0]),
+                       1.0, 0.0,
+                       1.0, 1.0]),
                    size: 2,
                    type: 'FLOAT'
                }
@@ -907,24 +899,20 @@ void main() {
                {
                    name: 'a_position',
                    data: new Float32Array([
+                       -1.0, -1.0,
                        -1.0, 1.0,
-                       1.0, 1.0,
-                       -1.0, -1.0,
-                       -1.0, -1.0,
-                       1.0, 1.0,
-                       1.0, -1.0]),
+                       1.0, -1.0,
+                       1.0, 1.0]),
                    size: 2,
                    type: 'FLOAT'
                },
                {
                    name: 'a_texCoord',
                    data: new Float32Array([
+                       0.0, 0.0,
                        0.0, 1.0,
-                       1.0, 1.0,
-                       0.0, 0.0,
-                       0.0, 0.0,
-                       1.0, 1.0,
-                       1.0, 0.0]),
+                       1.0, 0.0,
+                       1.0, 1.0]),
                    size: 2,
                    type: 'FLOAT'
                }

@@ -172,7 +172,7 @@ function draw (gl, video, data, dimensions) {
         // gl.clear(gl.COLOR_BUFFER_BIT);
 
         // Draw the rectangle.
-        gl.drawArrays(gl.TRIANGLES, 0, 6);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     });
 }
 
