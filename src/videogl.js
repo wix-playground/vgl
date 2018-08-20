@@ -37,7 +37,9 @@ function getWebGLContext (canvas) {
     return canvas.getContext('webgl', {
         preserveDrawingBuffer: false, // should improve performance - https://stackoverflow.com/questions/27746091/preservedrawingbuffer-false-is-it-worth-the-effort
         antialias: false, // should improve performance
-        premultipliedAlpha: false // eliminates dithering edges in transparent video on Chrome
+        premultipliedAlpha: false, // eliminates dithering edges in transparent video on Chrome
+        depth: false, // turn off for explicitness - and in some cases perf boost
+        stencil: false // turn off for explicitness - and in some cases perf boost
     });
 }
 
@@ -46,9 +48,10 @@ function getWebGLContext (canvas) {
  *
  * @param {WebGLRenderingContext} gl
  * @param {{width: number, height: number}} [dimensions]
+ * @param {vglSceneData} [data]
  * @return {boolean}
  */
-function resize (gl, dimensions) {
+function resize (gl, dimensions, data) {
     let resized = false;
     const canvas = gl.canvas;
     const realToCSSPixels = 1; //window.devicePixelRatio;
@@ -73,6 +76,21 @@ function resize (gl, dimensions) {
         canvas.width  = displayWidth;
         canvas.height = displayHeight;
         resized = true;
+    }
+
+    // if there was a size change and we got the scene data
+    if ( resized && data ) {
+        // only resize target textures that are bound to framebuffers
+        data.forEach(layer => {
+            const {source, target} = layer;
+            const isBufferTarget = Boolean(target && target.buffer);
+
+            if ( isBufferTarget ) {
+                _resizeTexture(gl, target);
+                // re-bind the source texture
+                gl.bindTexture(gl.TEXTURE_2D, source.texture);
+            }
+        });
     }
 
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -105,8 +123,12 @@ function loop (gl, video, data, dimensions) {
  * @param {{width: number, height: number}} dimensions
  */
 function draw (gl, video, data, dimensions) {
+    if ( video.readyState < video.HAVE_CURRENT_DATA ) {
+        return;
+    }
+
     // resize the target canvas if its size in the DOM changed
-    const resized = resize(gl, dimensions);
+    // const resized = resize(gl, dimensions);
 
     // these two fix bad dithered junk edges rendered in Safari
     // gl.enable(gl.BLEND);
@@ -126,14 +148,14 @@ function draw (gl, video, data, dimensions) {
         if ( source.buffer === null ) {
             gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
         }
 
-        if ( resized && isBufferTarget ) {
+        /*if ( resized && isBufferTarget ) {
             _resizeTexture(gl, target);
             // re-bind the source texture
             gl.bindTexture(gl.TEXTURE_2D, source.texture);
-        }
+        }*/
 
         // Tell it to use our program (pair of shaders)
         gl.useProgram(program);
@@ -144,9 +166,10 @@ function draw (gl, video, data, dimensions) {
         // set uniforms with data
         _setUniforms(gl, uniforms);
 
+        // no need since while we're updating the entire canvas
         // clear the buffer
-        gl.clearColor(0.0, 0.0, 0.0, 0.0);
-        gl.clear(gl.COLOR_BUFFER_BIT);
+        // gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        // gl.clear(gl.COLOR_BUFFER_BIT);
 
         // Draw the rectangle.
         gl.drawArrays(gl.TRIANGLES, 0, 6);

@@ -1,5 +1,6 @@
 const videogl = require('./src/videogl');
 const brightnessContrast = require('./src/brightness-contrast')();
+const transparentVideo = require('./src/transparent-video')();
 const assert = require('assert');
 
 describe('videogl', function() {
@@ -174,6 +175,23 @@ describe('videogl', function() {
 
             assert.strictEqual(gl.drawingBufferWidth, 850);
             assert.strictEqual(gl.drawingBufferHeight, 480);
+        });
+
+        it('should resize target to supplied dimensions and ignore canvas CSS dimensions', function () {
+            videogl.destroy(gl, scene);
+            const initData2fx = videogl.init(canvas, [transparentVideo, brightnessContrast]);
+
+            gl = initData2fx.gl;
+            scene = initData2fx.data;
+
+            assert.strictEqual(canvas.height, 150);
+
+            videogl.resize(gl, {width: 850, height: 480}, scene);
+
+            assert.strictEqual(gl.drawingBufferWidth, 850);
+            assert.strictEqual(gl.drawingBufferHeight, 480);
+
+            //TODO: check that target texture in framebuffer is actually resized
         });
 
         afterEach(function () {

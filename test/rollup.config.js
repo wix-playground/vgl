@@ -6,7 +6,8 @@ const config = {
     input: [
         '../src/vgl.js',
         '../src/videogl.js',
-        '../src/effects/brightness-contrast.js'
+        '../src/effects/brightness-contrast.js',
+        '../src/effects/transparent-video.js'
     ],
     output: {
         dir: './src',

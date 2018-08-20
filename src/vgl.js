@@ -26,6 +26,9 @@ function init (target, effects, dimensions) {
 function start (target, src) {
     const {gl, data, dimensions} = targets.get(target);
 
+    // resize the target canvas if its size in the DOM changed
+    videogl.resize(gl, dimensions, data);
+
     videogl.loop(gl, src, data, dimensions);
 }
 
@@ -69,10 +72,6 @@ class Vgl {
      */
     constructor (config) {
         this.init(config);
-
-        if ( this.media ) {
-            this.start();
-        }
     }
 
     /**
@@ -82,33 +81,32 @@ class Vgl {
      * @param {VglConfig} config
      */
     init (config) {
-        const {source, target, effects} = config;
-
-        this._initMedia(source);
+        const {target, effects} = config;
 
         const {gl, data} = videogl.init(target, effects, this.dimensions);
 
         this.gl = gl;
         this.data = data;
-
     }
 
     /**
      * Starts the animation loop.
      *
-     * @param {HTMLVideoElement|VglConfigSource} [source]
+     * @param {HTMLVideoElement|vglSource} [source]
      */
-    start (source) {
-        const loop = () => {
-            this.animationFrameId = window.requestAnimationFrame(loop);
-            videogl.draw(this.gl, this.media, this.data, this.dimensions);
-        };
-
+    setSource (source) {
         if ( source ) {
             this._initMedia(source);
         }
 
-        this.animationFrameId = window.requestAnimationFrame(loop);
+        if ( ! this.animationFrameId ) {
+            const loop = () => {
+                this.animationFrameId = window.requestAnimationFrame(loop);
+                videogl.draw(this.gl, this.media, this.data, this.dimensions);
+            };
+
+            this.animationFrameId = window.requestAnimationFrame(loop);
+        }
     }
 
     /**
@@ -148,6 +146,9 @@ class Vgl {
             this.dimensions = { width, height };
         }
 
+        // resize the target canvas if needed
+        videogl.resize(this.gl, this.dimensions, this.data);
+
         this.media = media;
         this.type = type || this.type;
     }
@@ -156,12 +157,11 @@ class Vgl {
 /**
  * @typedef {Object} VglConfig
  * @property {HTMLCanvasElement} target
- * @property {HTMLVideoElement|VglConfigSource} source
  * @property {effectConfig[]} effects
  */
 
 /**
- * @typedef {Object} VglConfigSource
+ * @typedef {Object} vglSource
  * @property {HTMLVideoElement} media
  * @property {string} type
  * @property {number} width

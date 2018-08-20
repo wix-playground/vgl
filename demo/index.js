@@ -40,7 +40,9 @@
        return canvas.getContext('webgl', {
            preserveDrawingBuffer: false, // should improve performance - https://stackoverflow.com/questions/27746091/preservedrawingbuffer-false-is-it-worth-the-effort
            antialias: false, // should improve performance
-           premultipliedAlpha: false // eliminates dithering edges in transparent video on Chrome
+           premultipliedAlpha: false, // eliminates dithering edges in transparent video on Chrome
+           depth: false, // turn off for explicitness - and in some cases perf boost
+           stencil: false // turn off for explicitness - and in some cases perf boost
        });
    }
 
@@ -49,9 +51,10 @@
     *
     * @param {WebGLRenderingContext} gl
     * @param {{width: number, height: number}} [dimensions]
+    * @param {vglSceneData} [data]
     * @return {boolean}
     */
-   function resize (gl, dimensions) {
+   function resize (gl, dimensions, data) {
        let resized = false;
        const canvas = gl.canvas;
        const realToCSSPixels = 1; //window.devicePixelRatio;
@@ -76,6 +79,21 @@
            canvas.width  = displayWidth;
            canvas.height = displayHeight;
            resized = true;
+       }
+
+       // if there was a size change and we got the scene data
+       if ( resized && data ) {
+           // only resize target textures that are bound to framebuffers
+           data.forEach(layer => {
+               const {source, target} = layer;
+               const isBufferTarget = Boolean(target && target.buffer);
+
+               if ( isBufferTarget ) {
+                   _resizeTexture(gl, target);
+                   // re-bind the source texture
+                   gl.bindTexture(gl.TEXTURE_2D, source.texture);
+               }
+           });
        }
 
        gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
@@ -108,8 +126,12 @@
     * @param {{width: number, height: number}} dimensions
     */
    function draw (gl, video, data, dimensions) {
+       if ( video.readyState < video.HAVE_CURRENT_DATA ) {
+           return;
+       }
+
        // resize the target canvas if its size in the DOM changed
-       const resized = resize(gl, dimensions);
+       // const resized = resize(gl, dimensions);
 
        // these two fix bad dithered junk edges rendered in Safari
        // gl.enable(gl.BLEND);
@@ -129,14 +151,14 @@
            if ( source.buffer === null ) {
                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
-               gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+               gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
            }
 
-           if ( resized && isBufferTarget ) {
+           /*if ( resized && isBufferTarget ) {
                _resizeTexture(gl, target);
                // re-bind the source texture
                gl.bindTexture(gl.TEXTURE_2D, source.texture);
-           }
+           }*/
 
            // Tell it to use our program (pair of shaders)
            gl.useProgram(program);
@@ -147,9 +169,10 @@
            // set uniforms with data
            _setUniforms(gl, uniforms);
 
+           // no need since while we're updating the entire canvas
            // clear the buffer
-           gl.clearColor(0.0, 0.0, 0.0, 0.0);
-           gl.clear(gl.COLOR_BUFFER_BIT);
+           // gl.clearColor(0.0, 0.0, 0.0, 0.0);
+           // gl.clear(gl.COLOR_BUFFER_BIT);
 
            // Draw the rectangle.
            gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -451,6 +474,9 @@
    function start (target, src) {
        const {gl, data, dimensions} = targets.get(target);
 
+       // resize the target canvas if its size in the DOM changed
+       videogl.resize(gl, dimensions, data);
+
        videogl.loop(gl, src, data, dimensions);
    }
 
@@ -494,10 +520,6 @@
         */
        constructor (config) {
            this.init(config);
-
-           if ( this.media ) {
-               this.start();
-           }
        }
 
        /**
@@ -507,33 +529,32 @@
         * @param {VglConfig} config
         */
        init (config) {
-           const {source, target, effects} = config;
-
-           this._initMedia(source);
+           const {target, effects} = config;
 
            const {gl, data} = videogl.init(target, effects, this.dimensions);
 
            this.gl = gl;
            this.data = data;
-
        }
 
        /**
         * Starts the animation loop.
         *
-        * @param {HTMLVideoElement|VglConfigSource} [source]
+        * @param {HTMLVideoElement|vglSource} [source]
         */
-       start (source) {
-           const loop = () => {
-               this.animationFrameId = window.requestAnimationFrame(loop);
-               videogl.draw(this.gl, this.media, this.data, this.dimensions);
-           };
-
+       setSource (source) {
            if ( source ) {
                this._initMedia(source);
            }
 
-           this.animationFrameId = window.requestAnimationFrame(loop);
+           if ( ! this.animationFrameId ) {
+               const loop = () => {
+                   this.animationFrameId = window.requestAnimationFrame(loop);
+                   videogl.draw(this.gl, this.media, this.data, this.dimensions);
+               };
+
+               this.animationFrameId = window.requestAnimationFrame(loop);
+           }
        }
 
        /**
@@ -573,6 +594,9 @@
                this.dimensions = { width, height };
            }
 
+           // resize the target canvas if needed
+           videogl.resize(this.gl, this.dimensions, this.data);
+
            this.media = media;
            this.type = type || this.type;
        }
@@ -581,12 +605,11 @@
    /**
     * @typedef {Object} VglConfig
     * @property {HTMLCanvasElement} target
-    * @property {HTMLVideoElement|VglConfigSource} source
     * @property {effectConfig[]} effects
     */
 
    /**
-    * @typedef {Object} VglConfigSource
+    * @typedef {Object} vglSource
     * @property {HTMLVideoElement} media
     * @property {string} type
     * @property {number} width
@@ -932,7 +955,7 @@ void main() {
 
    function check () {
        if (playing && timeupdate) {
-           instance.start(video);
+           instance.setSource({media: video, type: 'video', width: 1920, height: 1080});
        }
    }
 
@@ -969,6 +992,6 @@ void main() {
            input.addEventListener('input', handleRangeChange);
        });
 
-   const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc], source: {width: 1920, height: 1080}});
+   const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc]});
 
 }());
