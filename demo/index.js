@@ -149,8 +149,6 @@
 
            // if source has no buffer then the media is the actual source
            if ( source.buffer === null ) {
-               gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-
                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, video);
            }
 
@@ -220,6 +218,10 @@
                    texture: _createTexture(gl).texture,
                    buffer: null
                };
+
+               // flip Y axis for source texture
+               gl.bindTexture(gl.TEXTURE_2D, source.texture);
+               gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
            }
            else {
                source = lastTarget;
