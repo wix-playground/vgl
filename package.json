@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/ydaniv/vgl/issues"
   },
-  "homepage": "https://github.com/ydaniv/vgl#readme",
+  "homepage": "https://ydaniv.github.io/vgl/docs/index.html",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",

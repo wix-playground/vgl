@@ -134,7 +134,7 @@ function draw (gl, video, data, dimensions) {
     // gl.enable(gl.BLEND);
     // gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-    data.forEach(layer => {
+    data.forEach(function (layer) {
         const {program, source, target, attributes, uniforms} = layer;
         const isBufferTarget = Boolean(target && target.buffer);
 
@@ -244,7 +244,11 @@ function _initProgram (gl, effects, dimensions) {
         }
 
         // compile the GLSL program
-        const {program, vertexShader, fragmentShader} = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
+        const {program, vertexShader, fragmentShader, error, type} = _getWebGLProgram(gl, vertexSrc, fragmentSrc);
+
+        if ( error ) {
+            throw new Error(`${type} error:: ${error}`);
+        }
 
         // setup the vertex data
         const attribBuffers = _initVertexAttributes(gl, program, attributes);
@@ -277,6 +281,14 @@ function _getWebGLProgram (gl, vertexSrc, fragmentSrc) {
     const vertexShader = _createShader(gl, gl.VERTEX_SHADER, vertexSrc);
     const fragmentShader = _createShader(gl, gl.FRAGMENT_SHADER, fragmentSrc);
 
+    if ( vertexShader.error ) {
+        return vertexShader;
+    }
+
+    if ( fragmentShader.error ) {
+        return fragmentShader;
+    }
+
     return _createProgram(gl, vertexShader, fragmentShader);
 }
 
@@ -293,8 +305,14 @@ function _createProgram (gl, vertexShader, fragmentShader) {
         return {program, vertexShader, fragmentShader};
     }
 
-    console.log(gl.getProgramInfoLog(program));
+    const exception = {
+        error: gl.getProgramInfoLog(program),
+        type: 'program'
+    };
+
     gl.deleteProgram(program);
+
+    return exception;
 }
 
 function _createShader (gl, type, source) {
@@ -309,8 +327,14 @@ function _createShader (gl, type, source) {
         return shader;
     }
 
-    console.log(gl.getShaderInfoLog(shader));
+    const exception = {
+        error: gl.getShaderInfoLog(shader),
+        type: type === gl.VERTEX_SHADER ? 'VERTEX' : 'FRAGMENT'
+    };
+
     gl.deleteShader(shader);
+
+    return exception;
 }
 
 function _createTexture (gl, width=1, height=1) {
