@@ -490,6 +490,21 @@
    function init$1 (target, effects, dimensions) {
        const scene = videogl.init(target, effects, dimensions);
 
+
+       const _restore = function () {
+           target.removeEventListener('webglcontextrestored', _restore, true);
+
+           init$1(target, effects, dimensions);
+       };
+
+       const _lose = function () {
+           target.addEventListener('webglcontextrestored', _restore, true);
+
+           destroy$1(target);
+       };
+
+       target.addEventListener('webglcontextlost', _lose, true);
+
        targets.set(target, scene);
    }
 
@@ -538,7 +553,7 @@
    }
 
    /**
-    * Initialize a webgl target with video source and effects, and start animation loop.
+    * Initialize a webgl target with effects.
     *
     * @class Vgl
     * @param {VglConfig} config
@@ -549,11 +564,43 @@
         */
        constructor (config) {
            this.init(config);
+
+           const _restore = (e) => {
+               e.preventDefault();
+               this.config.target.removeEventListener('webglcontextrestored', _restore, true);
+
+               this.init(this.config);
+
+               if ( this._restoreLoop ) {
+                   delete this._restoreLoop;
+
+                   if ( this._source ) {
+                       this.setSource(this._source);
+                   }
+               }
+
+               delete this._source;
+           };
+
+           const _lose = (e) => {
+               e.preventDefault();
+               this.gl.canvas.addEventListener('webglcontextrestored', _restore, true);
+
+               // if animation loop is running
+               if ( this.animationFrameId ) {
+                   // cache this state for restoring animation loop as well
+                   this._restoreLoop = true;
+               }
+
+               this.destroy(true);
+           };
+
+           this.gl.canvas.addEventListener('webglcontextlost', _lose, true);
        }
 
        /**
         * Initializes a Vgl instance.
-        * This is called inside the constructor, but can be called again after {@Vgl#desotry()}.
+        * This is called inside the constructor, but can be called again after {@link Vgl#desotry()}.
         *
         * @param {VglConfig} config
         */
@@ -564,6 +611,9 @@
 
            this.gl = gl;
            this.data = data;
+
+           // cache for restoring context
+           this.config = config;
        }
 
        /**
@@ -597,16 +647,30 @@
        /**
         * Stops animation loop and frees all resources.
         */
-       destroy () {
+       destroy (keepState) {
            this.stop();
 
            videogl.destroy(this.gl, this.data);
+
+           if ( keepState ) {
+               const dims = this.dimensions || {};
+
+               this._source = {
+                   type: this.type,
+                   media: this.media,
+                   width: dims.width,
+                   height: dims.height
+               };
+           }
+           else {
+               this.config = null;
+               this.dimensions = null;
+           }
 
            this.gl = null;
            this.data = null;
            this.media = null;
            this.type = null;
-           this.dimensions = null;
        }
 
        _initMedia (source) {

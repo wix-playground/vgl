@@ -64,3 +64,19 @@ inputs.map(function (name) {
     });
 
 const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc]});
+//
+// const gl = instance.gl;
+// const ext = gl.getExtension('WEBGL_lose_context');
+//
+// document.addEventListener('keydown', function (ev) {
+//     if ( ev.key === 'Enter' ) {
+//         if  ( gl.isContextLost() ) {
+//             console.log('RESTORE');
+//             ext.restoreContext();
+//         }
+//         else {
+//             console.log('LOSE');
+//             ext.loseContext();
+//         }
+//     }
+// });
