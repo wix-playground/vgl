@@ -1033,7 +1033,7 @@ void main() {
 
    function check () {
        if (playing && timeupdate) {
-           instance.setSource({media: video, type: 'video', width: 1080, height: 1080});
+           instance.setSource({media: video, type: 'video', width: 704, height: 992});
        }
    }
 
