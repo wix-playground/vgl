@@ -1,5 +1,5 @@
 {
-  "name": "vgl",
+  "name": "fegl",
   "version": "0.0.1",
   "description": "Lightweight effects compositor on WebGL",
   "main": "index.js",
