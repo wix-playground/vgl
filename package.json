@@ -2,6 +2,7 @@
   "name": "fegl",
   "version": "0.1.0",
   "description": "Lightweight effects compositor on WebGL",
+  "registry": "https://registry.npmjs.org/",
   "main": "index.js",
   "scripts": {
     "build": "rollup -c",
