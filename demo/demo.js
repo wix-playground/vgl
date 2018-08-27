@@ -26,7 +26,7 @@ function isTimeupdate () {
 
 function check () {
     if (playing && timeupdate) {
-        instance.setSource({media: video, type: 'video', width: 1920, height: 1080});
+        instance.setSource({media: video, type: 'video', width: 1080, height: 1080});
     }
 }
 
