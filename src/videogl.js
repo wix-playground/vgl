@@ -34,13 +34,23 @@ function init (canvas, effects, dimensions) {
  * @return {WebGLRenderingContext}
  */
 function getWebGLContext (canvas) {
-    return canvas.getContext('webgl', {
+    let context;
+
+    const config = {
         preserveDrawingBuffer: false, // should improve performance - https://stackoverflow.com/questions/27746091/preservedrawingbuffer-false-is-it-worth-the-effort
         antialias: false, // should improve performance
         premultipliedAlpha: false, // eliminates dithering edges in transparent video on Chrome
         depth: false, // turn off for explicitness - and in some cases perf boost
         stencil: false // turn off for explicitness - and in some cases perf boost
-    });
+    };
+
+    context = canvas.getContext('webgl', config);
+
+    if ( ! context ) {
+        context = canvas.getContext('experimental-webgl', config);
+    }
+
+    return context;
 }
 
 /**
