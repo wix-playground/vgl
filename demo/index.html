@@ -16,8 +16,6 @@
         }
 
         canvas {
-            top: 0;
-            left: 0;
             width: 704px;
             height: 992px;
         }
@@ -28,10 +26,10 @@
     </style>
 </head>
 <body>
-<!--<video id="video" src="https://s3-eu-west-1.amazonaws.com/ireland-video-output/alpha/v-1920x1080-60fps.mp4" loop muted preload="auto" crossorigin="anonymous"></video>-->
-<video id="video" src="https://video.wixstatic.com/video/11062b_8264b3fe5e9e4df68dd8c1213f80cd18/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous"></video>
-<!--<video id="video" src="metalwheels.mp4" loop muted preload="auto" crossorigin="anonymous"></video>-->
-<!--<video id="video" src="https://video.wixstatic.com/video/11062b_7c6c697505584ae18cb0a2a47b53cf22/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous"></video>-->
+<!--<video id="video" src="https://s3-eu-west-1.amazonaws.com/ireland-video-output/alpha/v-1920x1080-60fps.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>-->
+<video id="video" src="https://video.wixstatic.com/video/11062b_8264b3fe5e9e4df68dd8c1213f80cd18/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>
+<!--<video id="video" src="metalwheels.mp4" loop muted preload="auto" crossorigin="anonymous" autoplay playsinline></video>-->
+<!--<video id="video" src="https://video.wixstatic.com/video/11062b_7c6c697505584ae18cb0a2a47b53cf22/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>-->
 <canvas id="target"></canvas>
 <aside>
     <fieldset>
@@ -66,6 +64,6 @@
         </p>
     </fieldset>
 </aside>
-<script src="index.js?v=2"></script>
+<script src="index.js?v=3"></script>
 </body>
 </html>

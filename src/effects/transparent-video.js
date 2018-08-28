@@ -22,15 +22,24 @@ precision mediump float;
 varying vec2 v_texColorCoord;
 varying vec2 v_texAlphaCoord;
 
+uniform bool u_multiply;
 uniform sampler2D u_source;
 
 void main() {
     float luma = texture2D(u_source, v_texAlphaCoord).r;
     vec3 color = texture2D(u_source, v_texColorCoord).rgb;
+
+    // fix Safari by multiplying again
+    if ( u_multiply ) {
+        color *= luma;
+    }
+    
     gl_FragColor = vec4(color, luma);
 }`;
 
 export default function () {
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+
     return {
         vertexSrc: VERTEX_SRC,
         fragmentSrc: FRAGMENT_SRC,
@@ -40,6 +49,12 @@ export default function () {
                 size: 2,
                 type: 'f',
                 data: [0.0, -0.5]
+            },
+            {
+                name: 'u_multiply',
+                size: 1,
+                type: 'i',
+                data: [+isSafari]
             }
         ],
         attributes: [
