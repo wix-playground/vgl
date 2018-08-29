@@ -14,8 +14,9 @@ describe('videogl', function() {
             const attributes = context.getContextAttributes();
 
             assert.strictEqual(attributes.antialias, false);
-            assert.strictEqual(attributes.premultipliedAlpha, false);
             assert.strictEqual(attributes.preserveDrawingBuffer, false);
+            assert.strictEqual(attributes.stencil, false);
+            assert.strictEqual(attributes.depth, false);
         });
     });
 

@@ -42,7 +42,6 @@
        const config = {
            preserveDrawingBuffer: false, // should improve performance - https://stackoverflow.com/questions/27746091/preservedrawingbuffer-false-is-it-worth-the-effort
            antialias: false, // should improve performance
-           premultipliedAlpha: false, // eliminates dithering edges in transparent video on Chrome
            depth: false, // turn off for explicitness - and in some cases perf boost
            stencil: false // turn off for explicitness - and in some cases perf boost
        };
@@ -772,24 +771,16 @@ precision mediump float;
 varying vec2 v_texColorCoord;
 varying vec2 v_texAlphaCoord;
 
-uniform bool u_multiply;
 uniform sampler2D u_source;
 
 void main() {
     float luma = texture2D(u_source, v_texAlphaCoord).r;
     vec3 color = texture2D(u_source, v_texColorCoord).rgb;
-
-    // fix Safari by multiplying again
-    if ( u_multiply ) {
-        color *= luma;
-    }
     
-    gl_FragColor = vec4(color, luma);
+    gl_FragColor = vec4(color * luma, luma);
 }`;
 
    function transparentVideo () {
-       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-
        return {
            vertexSrc: VERTEX_SRC,
            fragmentSrc: FRAGMENT_SRC,
@@ -799,12 +790,6 @@ void main() {
                    size: 2,
                    type: 'f',
                    data: [0.0, -0.5]
-               },
-               {
-                   name: 'u_multiply',
-                   size: 1,
-                   type: 'i',
-                   data: [+isSafari]
                }
            ],
            attributes: [
@@ -1096,20 +1081,37 @@ void main() {
        });
 
    const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc]});
-   //
+
    // const gl = instance.gl;
    // const ext = gl.getExtension('WEBGL_lose_context');
-   //
+
    // document.addEventListener('keydown', function (ev) {
    //     if ( ev.key === 'Enter' ) {
-   //         if  ( gl.isContextLost() ) {
-   //             console.log('RESTORE');
-   //             ext.restoreContext();
-   //         }
-   //         else {
-   //             console.log('LOSE');
-   //             ext.loseContext();
-   //         }
+           // const height = 1;
+           // const delta = 1;
+           // const buffer = new Uint8Array(gl.drawingBufferWidth * height * 4);
+           //
+           // gl.readPixels(0, gl.drawingBufferHeight - delta, gl.drawingBufferWidth, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+           //
+           // const colors = {};
+           // for ( let i=0; i < buffer.length; i += 4) {
+           //     const r = buffer[i];
+           //     const g = buffer[i+1];
+           //     const b = buffer[i+2];
+           //     const a = buffer[i+3];
+           //     const rgba = `${r},${g},${b},${a}`;
+           //
+           //     colors[i] = rgba;
+           // }
+           // console.log(colors);
+           // if  ( gl.isContextLost() ) {
+           //     console.log('RESTORE');
+           //     ext.restoreContext();
+           // }
+           // else {
+           //     console.log('LOSE');
+           //     ext.loseContext();
+           // }
    //     }
    // });
 

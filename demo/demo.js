@@ -64,19 +64,36 @@ inputs.map(function (name) {
     });
 
 const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc]});
-//
+
 // const gl = instance.gl;
 // const ext = gl.getExtension('WEBGL_lose_context');
-//
+
 // document.addEventListener('keydown', function (ev) {
 //     if ( ev.key === 'Enter' ) {
-//         if  ( gl.isContextLost() ) {
-//             console.log('RESTORE');
-//             ext.restoreContext();
-//         }
-//         else {
-//             console.log('LOSE');
-//             ext.loseContext();
-//         }
+        // const height = 1;
+        // const delta = 1;
+        // const buffer = new Uint8Array(gl.drawingBufferWidth * height * 4);
+        //
+        // gl.readPixels(0, gl.drawingBufferHeight - delta, gl.drawingBufferWidth, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+        //
+        // const colors = {};
+        // for ( let i=0; i < buffer.length; i += 4) {
+        //     const r = buffer[i];
+        //     const g = buffer[i+1];
+        //     const b = buffer[i+2];
+        //     const a = buffer[i+3];
+        //     const rgba = `${r},${g},${b},${a}`;
+        //
+        //     colors[i] = rgba;
+        // }
+        // console.log(colors);
+        // if  ( gl.isContextLost() ) {
+        //     console.log('RESTORE');
+        //     ext.restoreContext();
+        // }
+        // else {
+        //     console.log('LOSE');
+        //     ext.loseContext();
+        // }
 //     }
 // });
