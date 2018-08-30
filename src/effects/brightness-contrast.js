@@ -28,7 +28,7 @@ void main() {
     vec3 color = pixel.rgb * u_brightness;
     color = (color - half3) * u_contrast + half3;
 
-    gl_FragColor = vec4(color, pixel.a);
+    gl_FragColor = vec4(color * pixel.a, pixel.a);
 }`;
 
 export default function () {
