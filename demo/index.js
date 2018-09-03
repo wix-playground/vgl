@@ -1028,7 +1028,11 @@ void main() {
 
    video.addEventListener('playing', isPlaying, true);
    video.addEventListener('timeupdate', isTimeupdate, true);
-   video.addEventListener('canplay', () => video.play(), true);
+   video.addEventListener('canplay', canPlay, true);
+
+   function canPlay () {
+       video.play();
+   }
 
    function isPlaying () {
        playing = true;
@@ -1044,6 +1048,7 @@ void main() {
    function check () {
        if (playing && timeupdate) {
            instance.setSource({media: video, type: 'video', width: 704, height: 992});
+           video.removeEventListener('canplay', canPlay, true);
        }
    }
 
@@ -1080,7 +1085,7 @@ void main() {
            input.addEventListener('input', handleRangeChange);
        });
 
-   const instance = new vgl.Vgl({target, effects: [transparentVideo(), hs, bc]});
+   const instance = new vgl.Vgl({target, effects: [transparentVideo()]});
 
    // const gl = instance.gl;
    // const ext = gl.getExtension('WEBGL_lose_context');
