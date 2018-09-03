@@ -1,80 +1,5 @@
 import videogl from './videogl';
 
-const targets = new Map();
-
-/**
- * Initialize a canvas with effects to be a target for rendering media into.
- *
- * @name vgl.init
- * @param {HTMLCanvasElement} target
- * @param {effectConfig[]} effects
- * @param {{width: number, height: number}} [dimensions]
- */
-function init (target, effects, dimensions) {
-    const scene = videogl.init(target, effects, dimensions);
-
-
-    const _restore = function () {
-        target.removeEventListener('webglcontextrestored', _restore, true);
-
-        init(target, effects, dimensions);
-    };
-
-    const _lose = function () {
-        target.addEventListener('webglcontextrestored', _restore, true);
-
-        destroy(target);
-    };
-
-    target.addEventListener('webglcontextlost', _lose, true);
-
-    targets.set(target, scene);
-}
-
-/**
- * Start render loop of source media into target canvas.
- *
- * @name vgl.start
- * @param {HTMLCanvasElement} target
- * @param {HTMLVideoElement} src
- */
-function start (target, src) {
-    const {gl, data, dimensions} = targets.get(target);
-
-    // resize the target canvas if its size in the DOM changed
-    videogl.resize(gl, dimensions, data);
-
-    videogl.loop(gl, src, data, dimensions);
-}
-
-/**
- * Stop the render loop for the given source canvas.
- *
- * @name vgl.stop
- * @param {HTMLCanvasElement} target
- */
-function stop (target) {
-    const {gl} = targets.get(target);
-
-    videogl.stop(gl);
-}
-
-/**
- * Detach and free all bound resources for the given target
- *
- * @name vgl.destroy
- * @param {HTMLCanvasElement} target
- */
-function destroy (target) {
-    const {gl, data} = targets.get(target);
-
-    // delete all used resources
-    videogl.destroy(gl, data);
-
-    // remove cached scene from registered targets
-    targets.delete(target);
-}
-
 /**
  * Initialize a webgl target with effects.
  *
@@ -257,9 +182,5 @@ class Vgl {
  */
 
 export default {
-    init,
-    start,
-    stop,
-    destroy,
     Vgl
 }

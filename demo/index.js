@@ -483,81 +483,6 @@
       @property {number} size
     */
 
-   const targets = new Map();
-
-   /**
-    * Initialize a canvas with effects to be a target for rendering media into.
-    *
-    * @name vgl.init
-    * @param {HTMLCanvasElement} target
-    * @param {effectConfig[]} effects
-    * @param {{width: number, height: number}} [dimensions]
-    */
-   function init$1 (target, effects, dimensions) {
-       const scene = videogl.init(target, effects, dimensions);
-
-
-       const _restore = function () {
-           target.removeEventListener('webglcontextrestored', _restore, true);
-
-           init$1(target, effects, dimensions);
-       };
-
-       const _lose = function () {
-           target.addEventListener('webglcontextrestored', _restore, true);
-
-           destroy$1(target);
-       };
-
-       target.addEventListener('webglcontextlost', _lose, true);
-
-       targets.set(target, scene);
-   }
-
-   /**
-    * Start render loop of source media into target canvas.
-    *
-    * @name vgl.start
-    * @param {HTMLCanvasElement} target
-    * @param {HTMLVideoElement} src
-    */
-   function start (target, src) {
-       const {gl, data, dimensions} = targets.get(target);
-
-       // resize the target canvas if its size in the DOM changed
-       videogl.resize(gl, dimensions, data);
-
-       videogl.loop(gl, src, data, dimensions);
-   }
-
-   /**
-    * Stop the render loop for the given source canvas.
-    *
-    * @name vgl.stop
-    * @param {HTMLCanvasElement} target
-    */
-   function stop$1 (target) {
-       const {gl} = targets.get(target);
-
-       videogl.stop(gl);
-   }
-
-   /**
-    * Detach and free all bound resources for the given target
-    *
-    * @name vgl.destroy
-    * @param {HTMLCanvasElement} target
-    */
-   function destroy$1 (target) {
-       const {gl, data} = targets.get(target);
-
-       // delete all used resources
-       videogl.destroy(gl, data);
-
-       // remove cached scene from registered targets
-       targets.delete(target);
-   }
-
    /**
     * Initialize a webgl target with effects.
     *
@@ -740,10 +665,6 @@
     */
 
    var vgl = {
-       init: init$1,
-       start,
-       stop: stop$1,
-       destroy: destroy$1,
        Vgl
    };
 
