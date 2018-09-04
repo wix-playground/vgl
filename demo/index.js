@@ -1008,7 +1008,7 @@ void main() {
            input.addEventListener('input', handleRangeChange);
        });
 
-   const instance = new vgl.Vgl({target, effects: [transparentVideo()]});
+   const instance = new vgl.Vgl({target, effects: [transparentVideo(), bc, hs]});
 
    // const gl = instance.gl;
    // const ext = gl.getExtension('WEBGL_lose_context');
