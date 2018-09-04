@@ -1,8 +1,8 @@
 (function (global, factory) {
-   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-   typeof define === 'function' && define.amd ? define(factory) :
-   (global.vgl = factory());
-}(this, (function () { 'use strict';
+   typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+   typeof define === 'function' && define.amd ? define(['exports'], factory) :
+   (factory((global.vgl = {})));
+}(this, (function (exports) { 'use strict';
 
    var videogl = {
        init,
@@ -487,6 +487,72 @@
     */
 
    /**
+    * Initialize a ticker instance for batching animation of multiple Vgl instances.
+    *
+    * @class Ticker
+    */
+   class Ticker {
+       constructor () {
+           this.pool = [];
+       }
+
+       /**
+        * Starts the animation loop.
+        */
+       start () {
+           if ( ! this.animationFrameId ) {
+               const loop = () => {
+                   this.animationFrameId = window.requestAnimationFrame(loop);
+                   this.draw();
+               };
+
+               this.animationFrameId = window.requestAnimationFrame(loop);
+           }
+       }
+
+       /**
+        * Stops the animation loop.
+        */
+       stop () {
+           window.cancelAnimationFrame(this.animationFrameId);
+           this.animationFrameId = null;
+       }
+
+       /**
+        * Invoke draw() on all instances in the pool.
+        */
+       draw () {
+           this.pool.forEach(instance => instance.draw());
+       }
+
+       /**
+        * Add an instance to the pool.
+        *
+        * @param {Vgl} instance
+        */
+       add (instance) {
+           const index = this.pool.indexOf(instance);
+
+           if ( ! ~ index ) {
+               this.pool.push(instance);
+           }
+       }
+
+       /**
+        * Remove an instance form the pool.
+        *
+        * @param {Vgl} instance
+        */
+       remove (instance) {
+           const index = this.pool.indexOf(instance);
+
+           if ( ~ index ) {
+               this.pool.splice(index, 1);
+           }
+       }
+   }
+
+   /**
     * Initialize a webgl target with effects.
     *
     * @class Vgl
@@ -521,7 +587,7 @@
                this.gl.canvas.addEventListener('webglcontextrestored', this._restoreContext, true);
 
                // if animation loop is running
-               if ( this.animationFrameId ) {
+               if ( this.animationFrameId || this.playing ) {
                    // cache this state for restoring animation loop as well
                    this._restoreLoop = true;
                }
@@ -539,7 +605,7 @@
         * @param {VglConfig} config
         */
        init (config) {
-           const {target, effects} = config;
+           const {target, effects, ticker} = config;
 
            const {gl, data} = videogl.init(target, effects, this.dimensions);
 
@@ -548,10 +614,11 @@
 
            // cache for restoring context
            this.config = config;
+           this.ticker = ticker;
        }
 
        /**
-        * Starts the animation loop.
+        * Set the source config.
         *
         * @param {HTMLVideoElement|vglSource} [source]
         */
@@ -559,23 +626,53 @@
            if ( source ) {
                this._initMedia(source);
            }
+       }
 
-           if ( ! this.animationFrameId ) {
+       /**
+        * Draw current scene.
+        */
+       draw () {
+           videogl.draw(this.gl, this.media, this.data, this.dimensions);
+       }
+
+       /**
+        * Starts the animation loop.
+        */
+       play () {
+           if ( this.ticker ) {
+               if ( this.animationFrameId ) {
+                   this.stop();
+               }
+
+               if ( ! this.playing ) {
+                   this.playing = true;
+                   this.ticker.add(this);
+               }
+           }
+           else if ( ! this.animationFrameId ) {
                const loop = () => {
                    this.animationFrameId = window.requestAnimationFrame(loop);
-                   videogl.draw(this.gl, this.media, this.data, this.dimensions);
+                   this.draw();
                };
 
                this.animationFrameId = window.requestAnimationFrame(loop);
            }
+
        }
 
        /**
         * Stops the animation loop.
         */
        stop () {
-           window.cancelAnimationFrame(this.animationFrameId);
-           this.animationFrameId = null;
+           if ( this.animationFrameId ) {
+               window.cancelAnimationFrame(this.animationFrameId);
+               this.animationFrameId = null;
+           }
+
+           if ( this.playing ) {
+               this.playing = false;
+               this.ticker.remove(this);
+           }
        }
 
        /**
@@ -631,48 +728,9 @@
        }
    }
 
-   /**
-    * @typedef {Object} VglConfig
-    * @property {HTMLCanvasElement} target
-    * @property {effectConfig[]} effects
-    */
+   exports.Vgl = Vgl;
+   exports.Ticker = Ticker;
 
-   /**
-    * @typedef {Object} vglSource
-    * @property {HTMLVideoElement} media
-    * @property {string} type
-    * @property {number} width
-    * @property {number} height
-    */
-
-   /**
-    * @typedef {Object} effectConfig
-    * @property {string} vertexSrc
-    * @property {string} fragmentSrc
-    * @property {Attribute[]} attributes
-    * @property {Uniform[]} uniforms
-    */
-
-   /**
-    * @typedef {Object} Attribute
-    * @property {string} name
-    * @property {number} size
-    * @property {string} type
-    * @property {ArrayBufferView} data
-    */
-
-   /**
-    * @typedef {Object} Uniform
-    * @property {string} name
-    * @property {number} size
-    * @property {string} type
-    * @property {Array} data
-    */
-
-   var vgl = {
-       Vgl
-   };
-
-   return vgl;
+   Object.defineProperty(exports, '__esModule', { value: true });
 
 })));

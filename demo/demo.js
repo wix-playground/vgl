@@ -1,4 +1,4 @@
-import vgl from '../src/vgl';
+import {Vgl, Ticker} from '../src/vgl';
 import transparentVideo from '../src/effects/transparent-video';
 import brightnessContrast from '../src/effects/brightness-contrast';
 import hueSaturation from '../src/effects/hue-saturation';
@@ -31,6 +31,7 @@ function isTimeupdate () {
 function check () {
     if (playing && timeupdate) {
         instance.setSource({media: video, type: 'video', width: 704, height: 992});
+        instance.play();
         video.removeEventListener('canplay', canPlay, true);
     }
 }
@@ -68,7 +69,10 @@ inputs.map(function (name) {
         input.addEventListener('input', handleRangeChange);
     });
 
-const instance = new vgl.Vgl({target, effects: [transparentVideo(), bc, hs]});
+const ticker = new Ticker();
+const instance = new Vgl({target, effects: [transparentVideo(), bc, hs], ticker});
+
+ticker.start();
 
 // const gl = instance.gl;
 // const ext = gl.getExtension('WEBGL_lose_context');

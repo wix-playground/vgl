@@ -1,4 +1,5 @@
 import videogl from './videogl';
+import Ticker from './ticker';
 
 /**
  * Initialize a webgl target with effects.
@@ -35,7 +36,7 @@ class Vgl {
             this.gl.canvas.addEventListener('webglcontextrestored', this._restoreContext, true);
 
             // if animation loop is running
-            if ( this.animationFrameId ) {
+            if ( this.animationFrameId || this.playing ) {
                 // cache this state for restoring animation loop as well
                 this._restoreLoop = true;
             }
@@ -53,7 +54,7 @@ class Vgl {
      * @param {VglConfig} config
      */
     init (config) {
-        const {target, effects} = config;
+        const {target, effects, ticker} = config;
 
         const {gl, data} = videogl.init(target, effects, this.dimensions);
 
@@ -62,10 +63,11 @@ class Vgl {
 
         // cache for restoring context
         this.config = config;
+        this.ticker = ticker;
     }
 
     /**
-     * Starts the animation loop.
+     * Set the source config.
      *
      * @param {HTMLVideoElement|vglSource} [source]
      */
@@ -73,23 +75,53 @@ class Vgl {
         if ( source ) {
             this._initMedia(source);
         }
+    }
 
-        if ( ! this.animationFrameId ) {
+    /**
+     * Draw current scene.
+     */
+    draw () {
+        videogl.draw(this.gl, this.media, this.data, this.dimensions);
+    }
+
+    /**
+     * Starts the animation loop.
+     */
+    play () {
+        if ( this.ticker ) {
+            if ( this.animationFrameId ) {
+                this.stop();
+            }
+
+            if ( ! this.playing ) {
+                this.playing = true;
+                this.ticker.add(this);
+            }
+        }
+        else if ( ! this.animationFrameId ) {
             const loop = () => {
                 this.animationFrameId = window.requestAnimationFrame(loop);
-                videogl.draw(this.gl, this.media, this.data, this.dimensions);
+                this.draw();
             };
 
             this.animationFrameId = window.requestAnimationFrame(loop);
         }
+
     }
 
     /**
      * Stops the animation loop.
      */
     stop () {
-        window.cancelAnimationFrame(this.animationFrameId);
-        this.animationFrameId = null;
+        if ( this.animationFrameId ) {
+            window.cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+
+        if ( this.playing ) {
+            this.playing = false;
+            this.ticker.remove(this);
+        }
     }
 
     /**
@@ -183,6 +215,7 @@ class Vgl {
  * @property {Array} data
  */
 
-export default {
-    Vgl
+export {
+    Vgl,
+    Ticker
 }
