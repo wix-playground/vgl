@@ -45,6 +45,35 @@ describe('vgl', function() {
 
             instance.gl.getExtension('WEBGL_lose_context').loseContext();
         });
+
+        it('should should NOT trigger webglcontextlost event if destroy()\'ed', function (done) {
+            const canvas = document.createElement('canvas');
+
+            const instance = new vgl.Vgl({target: canvas, effects: [brightnessContrast]});
+            let calledTimes = 0;
+
+            assert(instance);
+
+            const ext = instance.gl.getExtension('WEBGL_lose_context');
+
+            instance.destroy();
+
+            const _des = instance.destroy.bind(instance);
+
+            instance.destroy = function () {
+                calledTimes += 1;
+                _des();
+                assert.strictEqual(calledTimes, 0);
+                done();
+            };
+
+            ext.loseContext();
+
+            setTimeout(() => {
+                assert.strictEqual(calledTimes, 0);
+                done();
+            }, 10);
+        });
     });
 
     describe('Vgl webglcontextrestored', function () {

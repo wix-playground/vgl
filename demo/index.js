@@ -496,9 +496,9 @@
        constructor (config) {
            this.init(config);
 
-           const _restore = (e) => {
+           this._restoreContext = (e) => {
                e.preventDefault();
-               this.config.target.removeEventListener('webglcontextrestored', _restore, true);
+               this.config.target.removeEventListener('webglcontextrestored', this._restoreContext, true);
 
                this.init(this.config);
 
@@ -513,9 +513,9 @@
                delete this._source;
            };
 
-           const _lose = (e) => {
+           this._loseContext = (e) => {
                e.preventDefault();
-               this.gl.canvas.addEventListener('webglcontextrestored', _restore, true);
+               this.gl.canvas.addEventListener('webglcontextrestored', this._restoreContext, true);
 
                // if animation loop is running
                if ( this.animationFrameId ) {
@@ -526,7 +526,7 @@
                this.destroy(true);
            };
 
-           this.gl.canvas.addEventListener('webglcontextlost', _lose, true);
+           this.gl.canvas.addEventListener('webglcontextlost', this._loseContext, true);
        }
 
        /**
@@ -596,6 +596,8 @@
            else {
                this.config = null;
                this.dimensions = null;
+
+               this.gl.canvas.removeEventListener('webglcontextlost', this._loseContext, true);
            }
 
            this.gl = null;
