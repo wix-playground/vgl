@@ -84,6 +84,58 @@
               
                 
                 <li><a
+                  href='#ticker'
+                  class=" toggle-sibling">
+                  Ticker
+                  <span class='icon'>▸</span>
+                </a>
+                
+                <div class='toggle-target display-none'>
+                  
+                  
+                    <ul class='list-reset py1-ul pl1'>
+                      <li class='h5'><span>Instance members</span></li>
+                      
+                      <li><a
+                        href='#tickerstart'
+                        class='regular pre-open'>
+                        #start
+                      </a></li>
+                      
+                      <li><a
+                        href='#tickerstop'
+                        class='regular pre-open'>
+                        #stop
+                      </a></li>
+                      
+                      <li><a
+                        href='#tickerdraw'
+                        class='regular pre-open'>
+                        #draw
+                      </a></li>
+                      
+                      <li><a
+                        href='#tickeradd'
+                        class='regular pre-open'>
+                        #add
+                      </a></li>
+                      
+                      <li><a
+                        href='#tickerremove'
+                        class='regular pre-open'>
+                        #remove
+                      </a></li>
+                      
+                    </ul>
+                  
+                  
+                  
+                </div>
+                
+                </li>
+              
+                
+                <li><a
                   href='#vglconfig'
                   class="">
                   VglConfig
@@ -266,7 +318,7 @@ This is called inside the constructor, but can be called again after <a href="Vg
       <div class="clearfix small pointer toggle-sibling">
         <div class="py1 contain">
             <a class='icon pin-right py1 dark-link caret-right'>▸</a>
-            <span class='code strong strong truncate'>setSource(source?)</span>
+            <span class='code strong strong truncate'>setSource(source)</span>
         </div>
       </div>
       <div class="clearfix display-none toggle-target">
@@ -278,7 +330,7 @@ This is called inside the constructor, but can be called again after <a href="Vg
 
  
   
-    <div class='pre p1 fill-light mt0'>setSource(source: (<a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement">HTMLVideoElement</a> | <a href="#vglsource">vglSource</a>)?)</div>
+    <div class='pre p1 fill-light mt0'>setSource(source: (<a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement">HTMLVideoElement</a> | <a href="#vglsource">vglSource</a>))</div>
    
   
   
@@ -296,7 +348,7 @@ This is called inside the constructor, but can be called again after <a href="Vg
       
         <div class='space-bottom0'>
           <div>
-            <span class='code bold'>source</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement">HTMLVideoElement</a> | <a href="#vglsource">vglSource</a>)?)</code>
+            <span class='code bold'>source</span> <code class='quiet'>((<a href="https://developer.mozilla.org/docs/Web/API/HTMLVideoElement">HTMLVideoElement</a> | <a href="#vglsource">vglSource</a>))</code>
 	    
           </div>
           
@@ -542,6 +594,326 @@ This is called inside the constructor, but can be called again after <a href="Vg
   
   <div class='clearfix'>
     
+    <h3 class='fl m0' id='ticker'>
+      Ticker
+    </h3>
+    
+    
+  </div>
+  
+
+  <p>Initialize a ticker instance for batching animation of multiple Vgl instances.</p>
+
+ 
+  
+    <div class='pre p1 fill-light mt0'>new Ticker()</div>
+   
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Instance Members</div>
+    <div class="clearfix">
+  
+    <div class='border-bottom' id='tickerstart'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>start()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Starts the animation loop.</p>
+
+ 
+  
+    <div class='pre p1 fill-light mt0'>start()</div>
+   
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='tickerstop'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>stop()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Stops the animation loop.</p>
+
+ 
+  
+    <div class='pre p1 fill-light mt0'>stop()</div>
+   
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='tickerdraw'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>draw()</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Invoke draw() on all instances in the pool.</p>
+
+ 
+  
+    <div class='pre p1 fill-light mt0'>draw()</div>
+   
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='tickeradd'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>add(instance)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Add an instance to the pool.</p>
+
+ 
+  
+    <div class='pre p1 fill-light mt0'>add(instance: <a href="#vgl">Vgl</a>)</div>
+   
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>instance</span> <code class='quiet'>(<a href="#vgl">Vgl</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+    <div class='border-bottom' id='tickerremove'>
+      <div class="clearfix small pointer toggle-sibling">
+        <div class="py1 contain">
+            <a class='icon pin-right py1 dark-link caret-right'>▸</a>
+            <span class='code strong strong truncate'>remove(instance)</span>
+        </div>
+      </div>
+      <div class="clearfix display-none toggle-target">
+        <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+
+  <p>Remove an instance form the pool.</p>
+
+ 
+  
+    <div class='pre p1 fill-light mt0'>remove(instance: <a href="#vgl">Vgl</a>)</div>
+   
+  
+  
+
+  
+  
+  
+  
+  
+  
+
+  
+    <div class='py1 quiet mt1 prose-big'>Parameters</div>
+    <div class='prose'>
+      
+        <div class='space-bottom0'>
+          <div>
+            <span class='code bold'>instance</span> <code class='quiet'>(<a href="#vgl">Vgl</a>)</code>
+	    
+          </div>
+          
+        </div>
+      
+    </div>
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+</section>
+
+      </div>
+    </div>
+  
+</div>
+
+  
+
+  
+</section>
+
+        
+          
+          <section class='p2 mb2 clearfix bg-white minishadow'>
+
+  
+  <div class='clearfix'>
+    
     <h3 class='fl m0' id='vglconfig'>
       VglConfig
     </h3>
@@ -584,6 +956,12 @@ This is called inside the constructor, but can be called again after <a href="Vg
       
         <div class='space-bottom0'>
           <span class='code bold'>effects</span> <code class='quiet'>(<a href="https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>&#x3C;<a href="#effectconfig">effectConfig</a>>)</code>
+          
+          
+        </div>
+      
+        <div class='space-bottom0'>
+          <span class='code bold'>ticker</span> <code class='quiet'>(<a href="#ticker">Ticker</a>?)</code>
           
           
         </div>

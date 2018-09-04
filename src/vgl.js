@@ -69,7 +69,7 @@ class Vgl {
     /**
      * Set the source config.
      *
-     * @param {HTMLVideoElement|vglSource} [source]
+     * @param {HTMLVideoElement|vglSource} source
      */
     setSource (source) {
         if ( source ) {
@@ -181,6 +181,7 @@ class Vgl {
  * @typedef {Object} VglConfig
  * @property {HTMLCanvasElement} target
  * @property {effectConfig[]} effects
+ * @property {Ticker} [ticker]
  */
 
 /**

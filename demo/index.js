@@ -16,6 +16,7 @@
    /**
     * Initialize a rendering context and compiled WebGLProgram for the given canvas and effects.
     *
+    * @private
     * @param {HTMLCanvasElement} canvas
     * @param effects
     * @param dimensions
@@ -32,7 +33,7 @@
    /**
     * Get a webgl context for the given canvas element.
     *
-    *
+    * @private
     * @param {HTMLCanvasElement} canvas
     * @return {WebGLRenderingContext}
     */
@@ -58,6 +59,7 @@
    /**
     * Resize the target canvas.
     *
+    * @private
     * @param {WebGLRenderingContext} gl
     * @param {{width: number, height: number}} [dimensions]
     * @param {vglSceneData} [data]
@@ -113,6 +115,7 @@
    /**
     * Start an animation loop that draws given video to target webgl context.
     *
+    * @private
     * @param {WebGLRenderingContext} gl
     * @param {HTMLVideoElement} video
     * @param {vglSceneData} data
@@ -129,6 +132,7 @@
    /**
     * Draw a given scene
     *
+    * @private
     * @param {WebGLRenderingContext} gl
     * @param {HTMLVideoElement} video
     * @param {vglSceneData} data
@@ -189,6 +193,7 @@
    /**
     * Stop an animation loop related to the given target webgl context.
     *
+    * @private
     * @param {WebGLRenderingContext} gl
     */
    function stop (gl) {
@@ -200,6 +205,7 @@
    /**
     * Free all resources attached to a specific webgl context.
     *
+    * @private
     * @param {WebGLRenderingContext} gl
     * @param {vglSceneData} data
     */
@@ -459,6 +465,7 @@
    }
 
    /**
+    * @private
     * @typedef {vglLayer[]} vglSceneData
     *
     * @typedef {Object} vglLayer
@@ -617,7 +624,7 @@
        /**
         * Set the source config.
         *
-        * @param {HTMLVideoElement|vglSource} [source]
+        * @param {HTMLVideoElement|vglSource} source
         */
        setSource (source) {
            if ( source ) {
