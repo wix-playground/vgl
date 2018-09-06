@@ -72,9 +72,26 @@ class Vgl {
      * @param {HTMLVideoElement|vglSource} source
      */
     setSource (source) {
-        if ( source ) {
-            this._initMedia(source);
+        if ( ! source ) return;
+
+        let type, media, width, height;
+
+        if ( Object.prototype.toString.call(source) === '[object Object]' ) {
+            ({type, media, width, height} = source);
         }
+        else {
+            media = source;
+        }
+
+        if ( width && height ) {
+            this.dimensions = { width, height };
+        }
+
+        // resize the target canvas if needed
+        videogl.resize(this.gl, this.dimensions, this.data);
+
+        this.media = media;
+        this.type = type || this.type;
     }
 
     /**
@@ -153,27 +170,6 @@ class Vgl {
         this.data = null;
         this.media = null;
         this.type = null;
-    }
-
-    _initMedia (source) {
-        let type, media, width, height;
-
-        if ( Object.prototype.toString.call(source) === '[object Object]' ) {
-            ({type, media, width, height} = source);
-        }
-        else {
-            media = source;
-        }
-
-        if ( width && height ) {
-            this.dimensions = { width, height };
-        }
-
-        // resize the target canvas if needed
-        videogl.resize(this.gl, this.dimensions, this.data);
-
-        this.media = media;
-        this.type = type || this.type;
     }
 }
 
