@@ -85,54 +85,6 @@ describe('videogl', function() {
         });
     });
 
-    // TODO: implement
-    describe('#loop()', function () {
-        let canvas, video, scene, gl;
-
-        beforeEach(function () {
-            video = document.createElement('video');
-            canvas = document.createElement('canvas');
-
-            const initData = videogl.init(canvas, [brightnessContrast]);
-
-            gl = initData.gl;
-            scene = initData.data;
-        });
-
-        it('should draw blank video to the target canvas', function () {
-            videogl.loop(gl, video, scene);
-            videogl.stop(gl, video, scene);
-        });
-
-        afterEach(function () {
-            videogl.destroy(gl, scene);
-        });
-    });
-
-    // TODO: implement
-    describe('#stop()', function () {
-        let canvas, video, scene, gl;
-
-        beforeEach(function () {
-            video = document.createElement('video');
-            canvas = document.createElement('canvas');
-
-            const initData = videogl.init(canvas, [brightnessContrast]);
-
-            gl = initData.gl;
-            scene = initData.data;
-        });
-
-        it('should stop a started drawing loop', function () {
-            videogl.loop(gl, video, scene);
-            videogl.stop(gl, video, scene);
-        });
-
-        afterEach(function () {
-            videogl.destroy(gl, scene);
-        });
-    });
-
     describe('#resize()', function () {
         let canvas, scene, gl;
 

@@ -7,14 +7,10 @@
    var videogl = {
        init,
        draw,
-       loop,
-       stop,
        destroy,
        resize,
        getWebGLContext
    };
-
-   const animationFrameIDs = new Map();
 
    /**
     * Initialize a rendering context and compiled WebGLProgram for the given canvas and effects.
@@ -116,23 +112,6 @@
    }
 
    /**
-    * Start an animation loop that draws given video to target webgl context.
-    *
-    * @private
-    * @param {WebGLRenderingContext} gl
-    * @param {HTMLVideoElement} video
-    * @param {vglSceneData} data
-    * @param {{width: number, height: number}} dimensions
-    */
-   function loop (gl, video, data, dimensions) {
-       const id = window.requestAnimationFrame(() => loop(gl, video, data, dimensions));
-
-       animationFrameIDs.set(gl, id);
-
-       draw(gl, video, data, dimensions);
-   }
-
-   /**
     * Draw a given scene
     *
     * @private
@@ -194,18 +173,6 @@
    }
 
    /**
-    * Stop an animation loop related to the given target webgl context.
-    *
-    * @private
-    * @param {WebGLRenderingContext} gl
-    */
-   function stop (gl) {
-       window.cancelAnimationFrame(animationFrameIDs.get(gl));
-
-       animationFrameIDs.delete(gl);
-   }
-
-   /**
     * Free all resources attached to a specific webgl context.
     *
     * @private
@@ -213,9 +180,6 @@
     * @param {vglSceneData} data
     */
    function destroy (gl, data) {
-       // make sure  we're not animating
-       stop(gl);
-
        _destroy(gl, data);
    }
 
