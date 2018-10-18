@@ -4,14 +4,10 @@
    var videogl = {
        init,
        draw,
-       loop,
-       stop,
        destroy,
        resize,
        getWebGLContext
    };
-
-   const animationFrameIDs = new Map();
 
    /**
     * Initialize a rendering context and compiled WebGLProgram for the given canvas and effects.
@@ -113,23 +109,6 @@
    }
 
    /**
-    * Start an animation loop that draws given video to target webgl context.
-    *
-    * @private
-    * @param {WebGLRenderingContext} gl
-    * @param {HTMLVideoElement} video
-    * @param {vglSceneData} data
-    * @param {{width: number, height: number}} dimensions
-    */
-   function loop (gl, video, data, dimensions) {
-       const id = window.requestAnimationFrame(() => loop(gl, video, data, dimensions));
-
-       animationFrameIDs.set(gl, id);
-
-       draw(gl, video, data, dimensions);
-   }
-
-   /**
     * Draw a given scene
     *
     * @private
@@ -191,18 +170,6 @@
    }
 
    /**
-    * Stop an animation loop related to the given target webgl context.
-    *
-    * @private
-    * @param {WebGLRenderingContext} gl
-    */
-   function stop (gl) {
-       window.cancelAnimationFrame(animationFrameIDs.get(gl));
-
-       animationFrameIDs.delete(gl);
-   }
-
-   /**
     * Free all resources attached to a specific webgl context.
     *
     * @private
@@ -210,9 +177,6 @@
     * @param {vglSceneData} data
     */
    function destroy (gl, data) {
-       // make sure  we're not animating
-       stop(gl);
-
        _destroy(gl, data);
    }
 
@@ -627,9 +591,26 @@
         * @param {HTMLVideoElement|vglSource} source
         */
        setSource (source) {
-           if ( source ) {
-               this._initMedia(source);
+           if ( ! source ) return;
+
+           let type, media, width, height;
+
+           if ( Object.prototype.toString.call(source) === '[object Object]' ) {
+               ({type, media, width, height} = source);
            }
+           else {
+               media = source;
+           }
+
+           if ( width && height ) {
+               this.dimensions = { width, height };
+           }
+
+           // resize the target canvas if needed
+           videogl.resize(this.gl, this.dimensions, this.data);
+
+           this.media = media;
+           this.type = type || this.type;
        }
 
        /**
@@ -708,27 +689,6 @@
            this.data = null;
            this.media = null;
            this.type = null;
-       }
-
-       _initMedia (source) {
-           let type, media, width, height;
-
-           if ( Object.prototype.toString.call(source) === '[object Object]' ) {
-               ({type, media, width, height} = source);
-           }
-           else {
-               media = source;
-           }
-
-           if ( width && height ) {
-               this.dimensions = { width, height };
-           }
-
-           // resize the target canvas if needed
-           videogl.resize(this.gl, this.dimensions, this.data);
-
-           this.media = media;
-           this.type = type || this.type;
        }
    }
 
@@ -832,7 +792,7 @@ void main() {
     vec3 color = pixel.rgb * u_brightness;
     color = (color - half3) * u_contrast + half3;
 
-    gl_FragColor = vec4(color * pixel.a, pixel.a);
+    gl_FragColor = vec4(color, pixel.a);
 }`;
 
    function brightnessContrast () {
@@ -1005,8 +965,89 @@ void main() {
        };
    }
 
+   const VERTEX_SRC$3 = `
+precision mediump float;
+
+attribute vec2 a_texCoord;
+attribute vec2 a_position;
+
+varying vec2 v_texCoord;
+
+void main() {
+	v_texCoord = a_texCoord;
+	
+	gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+   const FRAGMENT_SRC$3 = `
+precision mediump float;
+
+varying vec2 v_texCoord;
+
+uniform sampler2D u_source;
+uniform vec4 u_light;
+uniform vec4 u_dark;
+
+const vec3 lumcoeff = vec3(0.2125, 0.7154, 0.0721);
+
+void main() {
+    vec4 pixel = texture2D(u_source, v_texCoord);
+    vec3 gray = vec3(dot(lumcoeff, pixel.rgb));
+    vec3 tonedColor = mix(u_dark.rgb, u_light.rgb, gray);
+    gl_FragColor = vec4(tonedColor, 1.0) * pixel.a;
+}`;
+
+   function duotone () {
+       return {
+           vertexSrc: VERTEX_SRC$3,
+           fragmentSrc: FRAGMENT_SRC$3,
+           uniforms: [
+               /**
+                * Light tone
+                */
+               {
+                   name: 'u_light',
+                   size: 4,
+                   type: 'f',
+                   data: [0.9882352941, 0.7333333333, 0.05098039216, 1]
+               },
+               /**
+                * Dark tone
+                */
+               {
+                   name: 'u_dark',
+                   size: 4,
+                   type: 'f',
+                   data: [0.7411764706, 0.0431372549, 0.568627451, 1]
+               }
+           ],
+           attributes: [
+               {
+                   name: 'a_position',
+                   data: new Float32Array([
+                       -1.0, -1.0,
+                       -1.0, 1.0,
+                       1.0, -1.0,
+                       1.0, 1.0]),
+                   size: 2,
+                   type: 'FLOAT'
+               },
+               {
+                   name: 'a_texCoord',
+                   data: new Float32Array([
+                       0.0, 0.0,
+                       0.0, 1.0,
+                       1.0, 0.0,
+                       1.0, 1.0]),
+                   size: 2,
+                   type: 'FLOAT'
+               }
+           ]
+       };
+   }
+
    const video = document.querySelector('#video');
-   const target = document.querySelector('#target');
+   let target = document.querySelector('#target');
 
    let playing = false;
    let timeupdate = false;
@@ -1038,6 +1079,11 @@ void main() {
        }
    }
 
+   function hex2vec4 (hex) {
+       const s = hex.substring(1);
+       return [s[0] + s[1], s[2] + s[3], s[4] + s[5], 'ff'].map(h => parseInt(h, 16) / 255);
+   }
+
    function handleRangeChange (e) {
        const target = e.target;
        const effect = target.id;
@@ -1052,6 +1098,14 @@ void main() {
            case 'saturation':
                data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
                break;
+           case 'duotone-light':
+               instance.data[3].uniforms[0].data = hex2vec4(target.value);
+               e.target.nextElementSibling.textContent = target.value;
+               break;
+           case 'duotone-dark':
+               instance.data[3].uniforms[1].data = hex2vec4(target.value);
+               e.target.nextElementSibling.textContent = target.value;
+               break;
        }
 
        if ( data ) {
@@ -1060,9 +1114,13 @@ void main() {
        }
    }
 
-   const inputs = ['brightness', 'contrast', 'hue', 'saturation'];
+   const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
    const hs = hueSaturation();
    const bc = brightnessContrast();
+   const dt = duotone();
+   const tv = transparentVideo();
+
+   const effects = [tv, bc, hs, dt];
 
    inputs.map(function (name) {
        return document.getElementById(name);
@@ -1071,8 +1129,31 @@ void main() {
            input.addEventListener('input', handleRangeChange);
        });
 
+   document.querySelector('#toggle-duotone').addEventListener('input', e => {
+       const checked = e.target.checked;
+
+       instance.destroy();
+
+       // Works around an issue with working with the old context
+       const newCanvas = document.createElement('canvas');
+       target.parentElement.replaceChild(newCanvas, target);
+       target = newCanvas;
+
+
+       if ( checked ) {
+           effects.push(dt);
+       }
+       else {
+           effects.pop();
+       }
+
+       instance.init({target, effects, ticker});
+       instance.setSource({media: video, type: 'video', width: 704, height: 992});
+       instance.play();
+   });
+
    const ticker = new Ticker();
-   const instance = new Vgl({target, effects: [transparentVideo(), bc, hs], ticker});
+   let instance = new Vgl({target, effects, ticker});
 
    ticker.start();
 

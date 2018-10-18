@@ -7,9 +7,9 @@ attribute vec2 a_position;
 varying vec2 v_texCoord;
 
 void main() {
-    v_texCoord = a_texCoord;
-
-    gl_Position = vec4(a_position, 0.0, 1.0);
+	v_texCoord = a_texCoord;
+	
+	gl_Position = vec4(a_position, 0.0, 1.0);
 }`;
 
 const FRAGMENT_SRC = `
@@ -17,18 +17,17 @@ precision mediump float;
 
 varying vec2 v_texCoord;
 
-uniform float u_contrast;
-uniform float u_brightness;
 uniform sampler2D u_source;
+uniform vec4 u_light;
+uniform vec4 u_dark;
 
-const vec3 half3 = vec3(0.5);
+const vec3 lumcoeff = vec3(0.2125, 0.7154, 0.0721);
 
 void main() {
     vec4 pixel = texture2D(u_source, v_texCoord);
-    vec3 color = pixel.rgb * u_brightness;
-    color = (color - half3) * u_contrast + half3;
-
-    gl_FragColor = vec4(color, pixel.a);
+    vec3 gray = vec3(dot(lumcoeff, pixel.rgb));
+    vec3 tonedColor = mix(u_dark.rgb, u_light.rgb, gray);
+    gl_FragColor = vec4(tonedColor, 1.0) * pixel.a;
 }`;
 
 export default function () {
@@ -37,30 +36,22 @@ export default function () {
         fragmentSrc: FRAGMENT_SRC,
         uniforms: [
             /**
-             * 0.0 is completely black.
-             * 1.0 is no change.
-             *
-             * @min 0.0
-             * @default 1.0
+             * Light tone
              */
             {
-                name: 'u_brightness',
-                size: 1,
+                name: 'u_light',
+                size: 4,
                 type: 'f',
-                data: [1.0]
+                data: [0.9882352941, 0.7333333333, 0.05098039216, 1]
             },
             /**
-             * 0.0 is completely gray.
-             * 1.0 is no change.
-             *
-             * @min 0.0
-             * @default 1.0
+             * Dark tone
              */
             {
-                name: 'u_contrast',
-                size: 1,
+                name: 'u_dark',
+                size: 4,
                 type: 'f',
-                data: [1.0]
+                data: [0.7411764706, 0.0431372549, 0.568627451, 1]
             }
         ],
         attributes: [

@@ -2,9 +2,10 @@ import {Vgl, Ticker} from '../src/vgl';
 import transparentVideo from '../src/effects/transparent-video';
 import brightnessContrast from '../src/effects/brightness-contrast';
 import hueSaturation from '../src/effects/hue-saturation';
+import duotone from '../src/effects/duotone';
 
 const video = document.querySelector('#video');
-const target = document.querySelector('#target');
+let target = document.querySelector('#target');
 
 let playing = false;
 let timeupdate = false;
@@ -36,6 +37,11 @@ function check () {
     }
 }
 
+function hex2vec4 (hex) {
+    const s = hex.substring(1);
+    return [s[0] + s[1], s[2] + s[3], s[4] + s[5], 'ff'].map(h => parseInt(h, 16) / 255);
+}
+
 function handleRangeChange (e) {
     const target = e.target;
     const effect = target.id;
@@ -50,6 +56,14 @@ function handleRangeChange (e) {
         case 'saturation':
             data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
             break;
+        case 'duotone-light':
+            instance.data[3].uniforms[0].data = hex2vec4(target.value);
+            e.target.nextElementSibling.textContent = target.value;
+            break;
+        case 'duotone-dark':
+            instance.data[3].uniforms[1].data = hex2vec4(target.value);
+            e.target.nextElementSibling.textContent = target.value;
+            break;
     }
 
     if ( data ) {
@@ -58,9 +72,13 @@ function handleRangeChange (e) {
     }
 }
 
-const inputs = ['brightness', 'contrast', 'hue', 'saturation'];
+const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
 const hs = hueSaturation();
 const bc = brightnessContrast();
+const dt = duotone();
+const tv = transparentVideo();
+
+const effects = [tv, bc, hs, dt];
 
 inputs.map(function (name) {
     return document.getElementById(name);
@@ -69,8 +87,31 @@ inputs.map(function (name) {
         input.addEventListener('input', handleRangeChange);
     });
 
+document.querySelector('#toggle-duotone').addEventListener('input', e => {
+    const checked = e.target.checked;
+
+    instance.destroy();
+
+    // Works around an issue with working with the old context
+    const newCanvas = document.createElement('canvas');
+    target.parentElement.replaceChild(newCanvas, target);
+    target = newCanvas;
+
+
+    if ( checked ) {
+        effects.push(dt);
+    }
+    else {
+        effects.pop();
+    }
+
+    instance.init({target, effects, ticker});
+    instance.setSource({media: video, type: 'video', width: 704, height: 992});
+    instance.play();
+});
+
 const ticker = new Ticker();
-const instance = new Vgl({target, effects: [transparentVideo(), bc, hs], ticker});
+let instance = new Vgl({target, effects, ticker});
 
 ticker.start();
 
