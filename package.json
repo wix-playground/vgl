@@ -1,6 +1,6 @@
 {
   "name": "fegl",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Lightweight effects compositor on WebGL",
   "registry": "https://registry.npmjs.org/",
   "main": "index.js",
