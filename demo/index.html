@@ -8,12 +8,13 @@
     <style>
         body {
             margin: 0;
-            background: linear-gradient(to bottom, chocolate, goldenrod, silver, lightslategray);
+            /*background: linear-gradient(to bottom, chocolate, goldenrod, silver, lightslategray);*/
         }
 
+        aside,
         video,
         canvas {
-            display: block;
+            display: inline-block;
             vertical-align: top;
         }
 
@@ -29,41 +30,42 @@
 </head>
 <body>
 <!--<video id="video" src="https://s3-eu-west-1.amazonaws.com/ireland-video-output/alpha/v-1920x1080-60fps.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>-->
-<video id="video" src="https://video.wixstatic.com/video/11062b_8264b3fe5e9e4df68dd8c1213f80cd18/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>
+<!--<video id="video" src="https://video.wixstatic.com/video/11062b_8264b3fe5e9e4df68dd8c1213f80cd18/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>-->
 <!--<video id="video" src="metalwheels.mp4" loop muted preload="auto" crossorigin="anonymous" autoplay playsinline></video>-->
 <!--<video id="video" src="https://video.wixstatic.com/video/11062b_7c6c697505584ae18cb0a2a47b53cf22/720p/mp4/file.mp4" loop muted preload="auto" crossorigin="anonymous" playsinline></video>-->
+<video id="video" loop muted preload="auto" crossorigin="anonymous" playsinline></video>
 <canvas id="target"></canvas>
 <aside>
     <fieldset>
         <legend>Effect settings</legend>
 
-        <p>
-            <label for="brightness">Brightness</label>
-            <input type="range" id="brightness" name="brightness"
-                   value="1" min="0" max="10" step="0.1"/>
-            <span class="value">1</span>
-        </p>
+        <!--<p>-->
+            <!--<label for="brightness">Brightness</label>-->
+            <!--<input type="range" id="brightness" name="brightness"-->
+                   <!--value="1" min="0" max="10" step="0.1"/>-->
+            <!--<span class="value">1</span>-->
+        <!--</p>-->
 
-        <p>
-            <label for="contrast">Contrast</label>
-            <input type="range" id="contrast" name="contrast"
-                   value="1" min="0" max="10" step="0.1"/>
-            <span class="value">1</span>
-        </p>
+        <!--<p>-->
+            <!--<label for="contrast">Contrast</label>-->
+            <!--<input type="range" id="contrast" name="contrast"-->
+                   <!--value="1" min="0" max="10" step="0.1"/>-->
+            <!--<span class="value">1</span>-->
+        <!--</p>-->
 
-        <p>
-            <label for="hue">Hue</label>
-            <input type="range" id="hue" name="hue"
-                   value="0" min="-1" max="1" step="0.1"/>
-            <span class="value">0</span>
-        </p>
+        <!--<p>-->
+            <!--<label for="hue">Hue</label>-->
+            <!--<input type="range" id="hue" name="hue"-->
+                   <!--value="0" min="-1" max="1" step="0.1"/>-->
+            <!--<span class="value">0</span>-->
+        <!--</p>-->
 
-        <p>
-            <label for="saturation">Saturation</label>
-            <input type="range" id="saturation" name="saturation"
-                   value="0" min="-1" max="1" step="0.1"/>
-            <span class="value">0</span>
-        </p>
+        <!--<p>-->
+            <!--<label for="saturation">Saturation</label>-->
+            <!--<input type="range" id="saturation" name="saturation"-->
+                   <!--value="0" min="-1" max="1" step="0.1"/>-->
+            <!--<span class="value">0</span>-->
+        <!--</p>-->
 
         <p>
             <label for="toggle-duotone">Apply duotone</label>
