@@ -895,11 +895,11 @@ void main() {
            //     data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
            //     break;
            case 'duotone-light':
-               instance.data[3].uniforms[0].data = hex2vec4(target.value);
+               instance.data[1].uniforms[0].data = hex2vec4(target.value);
                e.target.nextElementSibling.textContent = target.value;
                break;
            case 'duotone-dark':
-               instance.data[3].uniforms[1].data = hex2vec4(target.value);
+               instance.data[1].uniforms[1].data = hex2vec4(target.value);
                e.target.nextElementSibling.textContent = target.value;
                break;
        }
@@ -914,7 +914,7 @@ void main() {
 
    const effects = [tv, dt];
 
-   const [, width, height, src] = window.location.search.match(/\?(\d+)\|(\d+)\|(.*)/);
+   const [, width, height, src] = decodeURIComponent(window.location.search).match(/\?(\d+)\|(\d+)\|(.*)/) || [];
 
    video.src = `https://video.wixstatic.com/video/${decodeURIComponent(src)}/mp4/file.mp4`;
 
