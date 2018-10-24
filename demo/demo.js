@@ -31,6 +31,10 @@ function isTimeupdate () {
 
 function check () {
     if (playing && timeupdate) {
+        width = video.videoWidth;
+        height = video.videoHeight / 2;
+        target.style.width = `${width}px`;
+        target.style.height = `${height}px`;
         instance.setSource({media: video, type: 'video', width, height});
         instance.play();
         video.removeEventListener('canplay', canPlay, true);
@@ -80,8 +84,8 @@ const dt = duotone();
 const tv = transparentVideo();
 
 const effects = [tv, hs, bc, dt];
-
-const [, width, height, src] = decodeURIComponent(window.location.search).match(/\?(\d+)\|(\d+)\|(.*)/) || [];
+const [, src] = decodeURIComponent(window.location.search).match(/\?(.*)/) || [];
+let width = 0, height = 0;
 
 video.src = `https://video.wixstatic.com/video/${decodeURIComponent(src)}/mp4/file.mp4`;
 
@@ -111,6 +115,8 @@ document.querySelector('#toggle-duotone').addEventListener('input', e => {
     }
 
     instance.init({target, effects, ticker});
+    target.style.width = `${width}px`;
+    target.style.height = `${height}px`;
     instance.setSource({media: video, type: 'video', width, height});
     instance.play();
 });
