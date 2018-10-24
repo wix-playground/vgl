@@ -771,12 +771,215 @@ attribute vec2 a_position;
 varying vec2 v_texCoord;
 
 void main() {
+    v_texCoord = a_texCoord;
+
+    gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+   const FRAGMENT_SRC$1 = `
+precision mediump float;
+
+varying vec2 v_texCoord;
+
+uniform float u_contrast;
+uniform float u_brightness;
+uniform sampler2D u_source;
+
+const vec3 half3 = vec3(0.5);
+
+void main() {
+    vec4 pixel = texture2D(u_source, v_texCoord);
+    vec3 color = pixel.rgb * u_brightness;
+    color = (color - half3) * u_contrast + half3;
+
+    gl_FragColor = vec4(color, pixel.a);
+}`;
+
+   function brightnessContrast () {
+       return {
+           vertexSrc: VERTEX_SRC$1,
+           fragmentSrc: FRAGMENT_SRC$1,
+           uniforms: [
+               /**
+                * 0.0 is completely black.
+                * 1.0 is no change.
+                *
+                * @min 0.0
+                * @default 1.0
+                */
+               {
+                   name: 'u_brightness',
+                   size: 1,
+                   type: 'f',
+                   data: [1.0]
+               },
+               /**
+                * 0.0 is completely gray.
+                * 1.0 is no change.
+                *
+                * @min 0.0
+                * @default 1.0
+                */
+               {
+                   name: 'u_contrast',
+                   size: 1,
+                   type: 'f',
+                   data: [1.0]
+               }
+           ],
+           attributes: [
+               {
+                   name: 'a_position',
+                   data: new Float32Array([
+                       -1.0, -1.0,
+                       -1.0, 1.0,
+                       1.0, -1.0,
+                       1.0, 1.0]),
+                   size: 2,
+                   type: 'FLOAT'
+               },
+               {
+                   name: 'a_texCoord',
+                   data: new Float32Array([
+                       0.0, 0.0,
+                       0.0, 1.0,
+                       1.0, 0.0,
+                       1.0, 1.0]),
+                   size: 2,
+                   type: 'FLOAT'
+               }
+           ]
+       };
+   }
+
+   const VERTEX_SRC$2 = `
+precision mediump float;
+
+attribute vec2 a_texCoord;
+attribute vec2 a_position;
+
+uniform float u_hue;
+
+varying vec2 v_texCoord;
+varying vec3 v_weights;
+
+void main() {
+	float angle = u_hue * 3.14159265358979323846264;
+	float s = sin(angle);
+	float c = cos(angle);
+	v_weights = (vec3(2.0 * c, -sqrt(3.0) * s - c, sqrt(3.0) * s - c) + 1.0) / 3.0;
 	v_texCoord = a_texCoord;
 	
 	gl_Position = vec4(a_position, 0.0, 1.0);
 }`;
 
-   const FRAGMENT_SRC$1 = `
+   const FRAGMENT_SRC$2 = `
+precision mediump float;
+
+uniform float u_hue;
+uniform float u_saturation;
+uniform sampler2D u_source;
+
+varying vec2 v_texCoord;
+varying vec3 v_weights;
+
+void main() {
+    vec4 pixel = texture2D(u_source, v_texCoord);
+
+    pixel.rgb = vec3(
+        dot(pixel.rgb, v_weights.xyz),
+        dot(pixel.rgb, v_weights.zxy),
+        dot(pixel.rgb, v_weights.yzx)
+    );
+    
+    vec3 adjustment = (pixel.r + pixel.g + pixel.b) / 3.0 - pixel.rgb;
+    if (u_saturation > 0.0) {
+        adjustment *= (1.0 - 1.0 / (1.0001 - u_saturation));
+    }
+    else {
+        adjustment *= (-u_saturation);
+    }
+    pixel.rgb += adjustment;
+
+    gl_FragColor = vec4(pixel.rgb, pixel.a);
+}`;
+
+   function hueSaturation () {
+       return {
+           vertexSrc: VERTEX_SRC$2,
+           fragmentSrc: FRAGMENT_SRC$2,
+           uniforms: [
+               /**
+                * 0.0 is no change.
+                * -1.0 is -180deg hue rotation.
+                * 1.0 is +180deg hue rotation.
+                *
+                * @min -1.0
+                * @max 1.0
+                * @default 0.0
+                */
+               {
+                   name: 'u_hue',
+                   size: 1,
+                   type: 'f',
+                   data: [0.0]
+               },
+               /**
+                * 0.0 is no change.
+                * -1.0 is grayscale.
+                * 1.0 is max saturation.
+                *
+                * @min -1.0
+                * @max 1.0
+                * @default 0.0
+                */
+               {
+                   name: 'u_saturation',
+                   size: 1,
+                   type: 'f',
+                   data: [0.0]
+               }
+           ],
+           attributes: [
+               {
+                   name: 'a_position',
+                   data: new Float32Array([
+                       -1.0, -1.0,
+                       -1.0, 1.0,
+                       1.0, -1.0,
+                       1.0, 1.0]),
+                   size: 2,
+                   type: 'FLOAT'
+               },
+               {
+                   name: 'a_texCoord',
+                   data: new Float32Array([
+                       0.0, 0.0,
+                       0.0, 1.0,
+                       1.0, 0.0,
+                       1.0, 1.0]),
+                   size: 2,
+                   type: 'FLOAT'
+               }
+           ]
+       };
+   }
+
+   const VERTEX_SRC$3 = `
+precision mediump float;
+
+attribute vec2 a_texCoord;
+attribute vec2 a_position;
+
+varying vec2 v_texCoord;
+
+void main() {
+	v_texCoord = a_texCoord;
+	
+	gl_Position = vec4(a_position, 0.0, 1.0);
+}`;
+
+   const FRAGMENT_SRC$3 = `
 precision mediump float;
 
 varying vec2 v_texCoord;
@@ -796,8 +999,8 @@ void main() {
 
    function duotone () {
        return {
-           vertexSrc: VERTEX_SRC$1,
-           fragmentSrc: FRAGMENT_SRC$1,
+           vertexSrc: VERTEX_SRC$3,
+           fragmentSrc: FRAGMENT_SRC$3,
            uniforms: [
                /**
                 * Light tone
@@ -884,35 +1087,41 @@ void main() {
    function handleRangeChange (e) {
        const target = e.target;
        const effect = target.id;
+       let data;
 
        switch ( effect ) {
-           // case 'brightness':
-           // case 'contrast':
-           //     data = bc.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
-           //     break;
-           // case 'hue':
-           // case 'saturation':
-           //     data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
-           //     break;
+           case 'brightness':
+           case 'contrast':
+               data = bc.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
+               break;
+           case 'hue':
+           case 'saturation':
+               data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
+               break;
            case 'duotone-light':
-               instance.data[1].uniforms[0].data = hex2vec4(target.value);
+               instance.data[3].uniforms[0].data = hex2vec4(target.value);
                e.target.nextElementSibling.textContent = target.value;
                break;
            case 'duotone-dark':
-               instance.data[1].uniforms[1].data = hex2vec4(target.value);
+               instance.data[3].uniforms[1].data = hex2vec4(target.value);
                e.target.nextElementSibling.textContent = target.value;
                break;
        }
+
+       if ( data ) {
+           data[0] = parseFloat(target.value);
+           e.target.nextElementSibling.textContent = data[0];
+       }
    }
 
-   // const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
-   const inputs = ['duotone-light', 'duotone-dark'];
-   // const hs = hueSaturation();
-   // const bc = brightnessContrast();
+   const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
+   // const inputs = ['duotone-light', 'duotone-dark'];
+   const hs = hueSaturation();
+   const bc = brightnessContrast();
    const dt = duotone();
    const tv = transparentVideo();
 
-   const effects = [tv, dt];
+   const effects = [tv, hs, bc, dt];
 
    const [, width, height, src] = decodeURIComponent(window.location.search).match(/\?(\d+)\|(\d+)\|(.*)/) || [];
 

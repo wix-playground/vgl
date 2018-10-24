@@ -1,7 +1,7 @@
 import {Vgl, Ticker} from '../src/vgl';
 import transparentVideo from '../src/effects/transparent-video';
-// import brightnessContrast from '../src/effects/brightness-contrast';
-// import hueSaturation from '../src/effects/hue-saturation';
+import brightnessContrast from '../src/effects/brightness-contrast';
+import hueSaturation from '../src/effects/hue-saturation';
 import duotone from '../src/effects/duotone';
 
 const video = document.querySelector('#video');
@@ -48,20 +48,20 @@ function handleRangeChange (e) {
     let data;
 
     switch ( effect ) {
-        // case 'brightness':
-        // case 'contrast':
-        //     data = bc.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
-        //     break;
-        // case 'hue':
-        // case 'saturation':
-        //     data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
-        //     break;
+        case 'brightness':
+        case 'contrast':
+            data = bc.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
+            break;
+        case 'hue':
+        case 'saturation':
+            data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
+            break;
         case 'duotone-light':
-            instance.data[1].uniforms[0].data = hex2vec4(target.value);
+            instance.data[3].uniforms[0].data = hex2vec4(target.value);
             e.target.nextElementSibling.textContent = target.value;
             break;
         case 'duotone-dark':
-            instance.data[1].uniforms[1].data = hex2vec4(target.value);
+            instance.data[3].uniforms[1].data = hex2vec4(target.value);
             e.target.nextElementSibling.textContent = target.value;
             break;
     }
@@ -72,14 +72,14 @@ function handleRangeChange (e) {
     }
 }
 
-// const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
-const inputs = ['duotone-light', 'duotone-dark'];
-// const hs = hueSaturation();
-// const bc = brightnessContrast();
+const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
+// const inputs = ['duotone-light', 'duotone-dark'];
+const hs = hueSaturation();
+const bc = brightnessContrast();
 const dt = duotone();
 const tv = transparentVideo();
 
-const effects = [tv, dt];
+const effects = [tv, hs, bc, dt];
 
 const [, width, height, src] = decodeURIComponent(window.location.search).match(/\?(\d+)\|(\d+)\|(.*)/) || [];
 
