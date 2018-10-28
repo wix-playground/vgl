@@ -61,11 +61,13 @@ function handleRangeChange (e) {
             data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
             break;
         case 'duotone-light':
-            instance.data[3].uniforms[0].data = hex2vec4(target.value);
+            // instance.data[3].uniforms[0].data = hex2vec4(target.value);
+            instance.data[1].uniforms[0].data = hex2vec4(target.value);
             e.target.nextElementSibling.textContent = target.value;
             break;
         case 'duotone-dark':
-            instance.data[3].uniforms[1].data = hex2vec4(target.value);
+            // instance.data[3].uniforms[1].data = hex2vec4(target.value);
+            instance.data[1].uniforms[1].data = hex2vec4(target.value);
             e.target.nextElementSibling.textContent = target.value;
             break;
     }
@@ -76,14 +78,15 @@ function handleRangeChange (e) {
     }
 }
 
-const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
-// const inputs = ['duotone-light', 'duotone-dark'];
+// const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
+const inputs = ['duotone-light', 'duotone-dark'];
 const hs = hueSaturation();
 const bc = brightnessContrast();
 const dt = duotone();
 const tv = transparentVideo();
 
-const effects = [tv, hs, bc, dt];
+// const effects = [tv, hs, bc, dt];
+const effects = [tv, dt];
 const [, src] = decodeURIComponent(window.location.search).match(/\?(.*)/) || [];
 let width = 0, height = 0;
 

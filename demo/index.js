@@ -992,7 +992,7 @@ const vec3 lumcoeff = vec3(0.2125, 0.7154, 0.0721);
 
 void main() {
     vec4 pixel = texture2D(u_source, v_texCoord);
-    vec3 gray = vec3(dot(lumcoeff, pixel.rgb));
+    vec3 gray = vec3(dot(lumcoeff, pixel.rgb / pixel.a));
     vec3 tonedColor = mix(u_dark.rgb, u_light.rgb, gray);
     gl_FragColor = vec4(tonedColor, 1.0) * pixel.a;
 }`;
@@ -1103,11 +1103,13 @@ void main() {
                data = hs.uniforms.filter(u => u.name === `u_${effect}`)[0].data;
                break;
            case 'duotone-light':
-               instance.data[3].uniforms[0].data = hex2vec4(target.value);
+               // instance.data[3].uniforms[0].data = hex2vec4(target.value);
+               instance.data[1].uniforms[0].data = hex2vec4(target.value);
                e.target.nextElementSibling.textContent = target.value;
                break;
            case 'duotone-dark':
-               instance.data[3].uniforms[1].data = hex2vec4(target.value);
+               // instance.data[3].uniforms[1].data = hex2vec4(target.value);
+               instance.data[1].uniforms[1].data = hex2vec4(target.value);
                e.target.nextElementSibling.textContent = target.value;
                break;
        }
@@ -1118,14 +1120,15 @@ void main() {
        }
    }
 
-   const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
-   // const inputs = ['duotone-light', 'duotone-dark'];
+   // const inputs = ['brightness', 'contrast', 'hue', 'saturation', 'duotone-light', 'duotone-dark'];
+   const inputs = ['duotone-light', 'duotone-dark'];
    const hs = hueSaturation();
    const bc = brightnessContrast();
    const dt = duotone();
    const tv = transparentVideo();
 
-   const effects = [tv, hs, bc, dt];
+   // const effects = [tv, hs, bc, dt];
+   const effects = [tv, dt];
    const [, src] = decodeURIComponent(window.location.search).match(/\?(.*)/) || [];
    let width = 0, height = 0;
 

@@ -25,7 +25,7 @@ const vec3 lumcoeff = vec3(0.2125, 0.7154, 0.0721);
 
 void main() {
     vec4 pixel = texture2D(u_source, v_texCoord);
-    vec3 gray = vec3(dot(lumcoeff, pixel.rgb));
+    vec3 gray = vec3(dot(lumcoeff, pixel.rgb / pixel.a));
     vec3 tonedColor = mix(u_dark.rgb, u_light.rgb, gray);
     gl_FragColor = vec4(tonedColor, 1.0) * pixel.a;
 }`;
