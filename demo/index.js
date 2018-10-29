@@ -1128,7 +1128,7 @@ void main() {
    const tv = transparentVideo();
 
    // const effects = [tv, hs, bc, dt];
-   const effects = [tv, dt];
+   const effects = [tv];
    const [, src] = decodeURIComponent(window.location.search).match(/\?(.*)/) || [];
    let width = 0, height = 0;
 
